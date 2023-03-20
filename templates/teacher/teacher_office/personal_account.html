@@ -1,0 +1,24 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+<div class="uk-flex-center uk-tab">
+   <a class="uk-button
+      {% if view.tab == 'tab1' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'teacher_urls:personal_account_url'  %}">Профиль </a>
+   <a class="uk-button
+      {% if view.tab == 'tab2' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'teacher_urls:un_pub_discipline_url'  %}">Дисциплины неопубликованые({{ discipline_unpublished.count }})</a>
+   <a class="uk-button
+      {% if view.tab == 'tab3' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'teacher_urls:pub_discipline_url'  %}">Дисциплины опубликованые({{ discipline_published.count }})</a>
+
+   <a class="uk-button {% if view.tab == 'tab4' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'teacher_urls:personal_account_change_url'  %}">Изменить профиль</a>
+</div>
+<div class="uk-flex-center uk-tab">
+{% if view.tab == 'tab1' %}{% include 'teacher/teacher_office/user_view.html' %}
+{% elif view.tab == 'tab4' %}{% include 'teacher/teacher_office/user_change.html' %}
+ {% else %}
+    {% include 'teacher/teacher_office/disciplines_list.html' %}
+{% endif %}
+</div>
+{% endblock %}

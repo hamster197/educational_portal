@@ -1,0 +1,38 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+{% load widget_tweaks %}
+{{ form.media.css }}
+<ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+    <h1>{{ view.type }} {{ view.object.parent_id }}</h1>
+    <p>{{ form.non_field_errors }}</p>
+   <form method="POST">
+    {% csrf_token %}
+            <p class="uk-text-lead"> {{ form.group_id.label }} {% render_field form.group_id class="uk-input" %}
+                {{ form.group_id.errors }}</p>
+            <p class="uk-text-lead"> {{ form.discipline_access_start.label }} {% render_field form.discipline_access_start class="uk-input" %}
+                {{ form.discipline_access_start.errors }}</p>
+            <p class="uk-text-lead"> {{ form.discipline_access_end.label }} {% render_field form.discipline_access_end class="uk-input" %}
+                {{ form.discipline_access_end.errors }}</p>
+           <p class="uk-text-lead"> {{ form.quiestion_quantity.label }} (  {{ view.object.parent_id.question_topic_access_id.all.count }}
+               {{ view.object.parent_id.get_quiz_questions }} {{ view.object.get_quiz_questions.value }})
+               {% render_field form.quiestion_quantity class="uk-input" %}
+               {{ form.quiestion_quantity.errors }}</p>
+           <p class="uk-text-lead"> {{ form.time.label }} {% render_field form.time class="uk-input" %}{{ form.time.errors }}</p>
+           <p class="uk-text-lead"> {{ form.test_quize_start.label }} {% render_field form.test_quize_start class="uk-input" %}
+               {{ form.test_quize_start.errors }}</p>
+           <p class="uk-text-lead"> {{ form.test_quize_end.label }} {% render_field form.test_quize_end class="uk-input" %}
+               {{ form.test_quize_end.errors }}</p>
+           <p class="uk-text-lead"> {{ form.final_quize_start.label }} {% render_field form.final_quize_start class="uk-input" %}
+               {{ form.final_quize_start.errors }}</p>
+           <p class="uk-text-lead"> {{ form.userfinal_quize_endname.label }} {% render_field form.final_quize_end class="uk-input" %}
+               {{ form.final_quize_end.errors }}</p>
+   <input class='uk-button uk-button-primary' type='submit' value='Save'>
+  </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {{ form.media.js }}
+
+{% endblock %}

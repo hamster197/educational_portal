@@ -1,0 +1,20 @@
+
+<div class="uk-flex uk-flex-column uk-width-1-1">
+{% for discipline in disciplines %}
+   <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+   <p><strong>Создан </strong>{{ discipline.creation_date }} </p>
+   <p><strong>Название </strong>{{ discipline.title }} </p>
+   <p><strong>Группы </strong>
+   {% if not discipline.discipline_access_parent_id.all %} N/A {% endif %}
+       {% for discipline in discipline.discipline_access_parent_id.all %}
+        {{ discipline }}
+       {% endfor %}
+           </p>
+   <p><strong>Кол-во: тем в дисциплине {{ discipline.get_themes }},
+       вопросов в тесте {{ discipline.get_quiz_questions }}</strong> </p>
+   <p><a href="{% url 'teacher_urls:discipline_edit_url' discipine_pk=discipline.pk %}">Редактировать</a></p>
+   </div>
+</div>
+{% endfor %}
+</div>
+

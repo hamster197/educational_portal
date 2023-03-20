@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Moodle</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/css/uikit.min.css" />
+      <!-- UIkit JS -->
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/js/uikit.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/js/uikit-icons.min.js"></script>
+   </head>
+   <body>
+      {% load flatpages %}
+      {% get_flatpages as flatpages %}
+      <div class="uk-section-primary tm-section-texture">
+      <div class="uk-navbar-container tm-navbar-container uk-navbar-transparent" uk-sticky="media: 960; ">
+         <div class="uk-container uk-container-expand">
+            <nav class="uk-navbar">
+               <div class="uk-navbar-left"><a class="uk-navbar-item uk-logo uk-active" href="/" aria-label="Back to Home" aria-current="page">
+                  My educational Portal
+                  </a>
+               </div>
+               <div class="uk-navbar-right">
+                  <ul class="uk-navbar-nav uk-visible@m">
+                     {% for page in flatpages|dictsort:"id" %}
+                     {% if page.pk != 1 %}
+                     <a href="{{ page.url }}">{{ page.title }}</a>
+                     {% endif %}
+                     {% endfor %}
+                     <a href="{% url 'portal_urls:blog_list_url' %}">Статьи</a>
+                     {% if user.is_authenticated %}
+                     {% if user.groups.get.name == 'teachers' %}
+                         <a href="{% url 'teacher_urls:personal_account_url' %}">Личный кабинет</a>
+                     {% endif %}
+                     <a href="{% url 'core_urls:logout_url' %}">Выйти({{ user.first_name }} {{ user.last_name }})</a>
+                     {% else %}
+                     <a href="{% url 'core_urls:login_url'  %}">Войти</a>
+                     {% endif %}
+                  </ul>
+                  <a class="uk-navbar-toggle uk-hidden@m" uk-navbar-toggle-icon href="#offcanvas" uk-toggle></a>
+               </div>
+            </nav>
+         </div>
+      </div>
+      <div class="uk-section uk-section-small uk-flex uk-flex-middle uk-text-center" uk-height-viewport="offset-top: true; offset-bottom: true">
+      <div class="uk-width-1-1">
+      <div class="uk-container">
+      <p></p>
+      {% block content %}
+      {{ flatpage.content }}
+      {% endblock %}
+   </body>

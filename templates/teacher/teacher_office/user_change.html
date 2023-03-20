@@ -1,0 +1,26 @@
+{% load widget_tweaks %}
+ <h1>Регистрация нового студента</h1>
+ <ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+   <form method="POST" >
+    {% csrf_token %}
+    <p class="uk-text-lead"> {{ form.username.label }} {% render_field form.username class="uk-input" %}{{ form.username.errors }}</p>
+    <p class="uk-text-lead"> {{ form.last_name.label }} {% render_field form.last_name class="uk-input" %}{{ form.last_name.errors }}</p>
+    <p class="uk-text-lead"> {{ form.first_name.label }} {% render_field form.first_name class="uk-input" %}{{ form.first_name.errors }}</p>
+    <p class="uk-text-lead"> {{ form.patronymic.label }} {% render_field form.patronymic class="uk-input" %}{{ form.patronymic.errors }}</p>
+    <p class="uk-text-lead"> {{ form.email.label }} {% render_field form.email class="uk-input" %}{{ form.email.errors }}</p>
+       <p class="uk-text-lead"> {{ form.hcaptcha }} {{ form.hcaptcha.errors }}</p>
+   <input class='uk-button uk-button-primary' type='submit' value='Изменить данные'>
+
+  </form>
+
+<form method="POST"  >
+    {% csrf_token %}
+    <p class="uk-text-lead">{{ change_password_from.new_password1.label }} {% render_field change_password_from.new_password1 class="uk-input" %}{{ change_password_from.new_password1.errors }}</p>
+    <p class="uk-text-lead">{{ change_password_from.new_password2.label }} {% render_field change_password_from.new_password2 class="uk-input" %}{{ change_password_from.new_password2.errors }}</p>
+    <p class="uk-text-lead">{{ change_password_from.new_password1.help_text }}</p>
+    <input class='uk-button uk-button-primary' type='submit' name='_change_password' value='Изменить пароль'>
+</form>

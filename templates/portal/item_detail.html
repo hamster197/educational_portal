@@ -1,0 +1,12 @@
+ {% extends 'main.html' %}1
+{% block content %}
+    {% if item.main_image %}<p><img src="{{ item.main_image.url }}" width="100"  ></p></p>{% endif %}
+    <p>{{ item.name }} </p>
+    <p>{{ item.text|safe }}</p>
+    {% if item.galery_blog_id.all %}
+    <strong>Image Galery</strong>
+    {% for image in item.galery_blog_id.all %}
+        <p><img src="{{ image.picture.url }}" width="100" ></p></p>
+    {% endfor %}
+    {% endif %}
+ {% endblock %}

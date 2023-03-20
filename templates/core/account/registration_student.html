@@ -1,0 +1,28 @@
+{% extends 'main.html' %}
+{% block content %}
+{% load widget_tweaks %}
+{{ form.media.css }}
+ <h1>Регистрация нового студента</h1>
+ <ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+   <form method="POST">
+    {% csrf_token %}
+    <p class="uk-text-lead"> {{ form.username.label }} {% render_field form.username class="uk-input" %}{{ form.username.errors }}</p>
+    <p class="uk-text-lead"> {{ form.last_name.label }} {% render_field form.last_name class="uk-input" %}{{ form.last_name.errors }}</p>
+    <p class="uk-text-lead"> {{ form.first_name.label }} {% render_field form.first_name class="uk-input" %}{{ form.first_name.errors }}</p>
+    <p class="uk-text-lead"> {{ form.patronymic.label }} {% render_field form.patronymic class="uk-input" %}{{ form.patronymic.errors }}</p>
+    <p class="uk-text-lead"> {{ form.email.label }} {% render_field form.email class="uk-input" %}{{ form.email.errors }}</p>
+    <p class="uk-text-lead"> {{ form.grade_book_number.label }} {% render_field form.grade_book_number class="uk-input" %}{{ form.grade_book_number.errors }}</p>
+    <p class="uk-text-lead"> {{ form.active_group_id.label }} {% render_field form.active_group_id class="uk-input" %}{{ form.active_group_id.errors }}</p>
+    <p class="uk-text-lead"> {{ form.password1.label }} {% render_field form.password1 class="uk-input" %}{{ form.password1.errors }}</p>
+    <p class="uk-text-lead"> {{ form.password2.label }} {% render_field form.password2 class="uk-input" %}{{ form.password2.errors }}</p>
+    <p class="uk-text-lead"> {{ form.password2.help_text }} {% render_field form.password2 class="uk-input" %}{{ form.password2.errors }}</p>
+       <p class="uk-text-lead"> {{ form.hcaptcha }} {{ form.hcaptcha.errors }}</p>
+   <input class='uk-button uk-button-primary' type='submit' value='Зарегестрироваться'>
+  </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {{ form.media.js }}
+{% endblock %}

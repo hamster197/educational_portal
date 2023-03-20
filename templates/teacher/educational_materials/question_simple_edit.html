@@ -1,0 +1,39 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+{% load widget_tweaks %}
+{% load static %}
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+
+  <h1>Редактирование вопроса( {{ view.object.variants_type }}{{ type }} ) </h1>
+  <h1>Дисциплина {{ topic.discipline_id }}{{ view.topic.discipline_id }}</h1>
+  <h1>Тема {{ topic }}{{ view.topic }} </h1>
+
+ <ul class="messages">
+   {% for message in messages %}
+       <li class="{{ message.tags }}"><a class="uk-button uk-button-default" >{{ message|striptags }}</a></li>
+   {% endfor %}
+</ul>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+<p>{{ form.non_field_errors }}</p>
+{% if view.object.image %}{{ view.object.image.url }} {% endif %}
+
+    <p class="uk-text-lead">{{ form.question_text.label }}{{ form.question_text }}{{ form.question_text.errors }}</p>
+    <p class="uk-text-lead">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</p>
+    <h1>Answers</h1>
+  {% for formset in inlines %}
+        {{ formset.management_form }} <br>
+      {% for form in formset %}
+          <p class="uk-text-lead">{{ form.pk }}{{ form.ansr_text.label }} {{ form.ansr_text }} {{ form.ansr_text.errors }} </p>
+          <p class="uk-text-lead">{{ form.answer_right.label }} {% render_field form.answer_right class="uk-checkbox" %}{{ form.answer_right.errors }} </p>
+          <p class="uk-text-lead">{{ form.DELETE.label }} {% render_field form.DELETE class="uk-checkbox" %}</p>
+          <p>{{ form.id }} </p>
+      {% endfor %}
+
+  {% endfor %}
+
+  <input class='uk-button uk-button-primary' type="submit" value="Submit" />
+</form>
+
+{% endblock %}

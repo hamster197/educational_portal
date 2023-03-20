@@ -1,0 +1,82 @@
+{% extends 'main_tpl.html' %}
+{% load widget_tweaks %}
+{% block content %}
+{{ form.media.css }}
+
+<ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+<form method="get">
+   {{ filter.form.question_text__icontains.label }} {{ filter.form.question_text__icontains }}
+   <input type="submit" />
+</form>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+{#    {{ form.as_p }}#}
+    {{ form.title.label }} {{ form.title }}{{ form.title.errors }} {{ form.non_field_errors }}
+  <input class='uk-button uk-button-primary' type="submit" value="Submit" />
+</form>
+ <h1>Дисциплина {{ view.topic.discipline_id }}  Тема {{ view.topic }}  </h1>
+    <h1>Вопросы в теме ( {{ instances.all.count }} ) </h1>
+    <h2>Создать новый вопрос</h2>
+<a href="{% url 'teacher_urls:question_one_create_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk %}">
+            Тест один правильный ответ </a></p>
+<a href="{% url 'teacher_urls:question_not_one_create_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk %}">
+            Тест несколько правильных ответов </a></p>
+<a href="{% url 'teacher_urls:question_new_sequence_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk %}">
+            Тест на последовательность </a></p>
+<a href="{% url 'teacher_urls:question_new_compliance_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk %}">
+            Тест на соответствие </a></p>
+{% for question in instances %}
+
+
+    <strong> {{ question.variants_type }} (ответов:
+        {% if question.variants_type != 'Тест на соответствие' %}
+            {{ question.answer_question_id.all.count }}
+        {% else %}
+            {% widthratio question.answer_question_id.all.count 2 1 %}
+        {% endif %}
+        )</strong>
+    <p><strong>Question</strong>{{ question.question_text|safe }} {{ question.pk }}</p>
+    {% if question.image %}
+        <p>{{ question.image.url }}</p>
+    {% endif %}
+    <div><strong>Ответы:</strong>
+        {% if question.variants_type == 'Тест один правильный ответ' or question.variants_type == 'Тест несколько правильных ответов'%}
+            <a href="{% url 'teacher_urls:question_edit_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk pk=question.pk %}">
+            Edit  </a></p>
+            {% include 'teacher/educational_materials/question_answer_siple.html' %}
+        {% elif question.variants_type == 'Тест на последовательность' %}
+            <a href="{% url 'teacher_urls:question_edit_sequence_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk pk=question.pk %}">
+            Edit  </a></p>
+            {% include 'teacher/educational_materials/question_answer_sequence.html' %}
+        {% elif question.variants_type == 'Тест на соответствие' %}
+            <a href="{% url 'teacher_urls:question_edit_compliance_url' topic_pk=view.topic.pk discipine_pk=view.topic.discipline_id.pk pk=question.pk %}">
+            Edit  </a></p>
+            {% include 'teacher/educational_materials/question_answer_accordance.html' %}
+        {% endif %}
+    </div>
+{% endfor %}
+
+{% if is_paginated %}
+<ul class="pagination">
+   {% if page_obj.has_previous %}
+   <li>
+      <span><a href="?page={{ page_obj.previous_page_number }}">Previous</a></span>
+   </li>
+   {% endif %}
+   <li class="">
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}. {{ instances.count}}</span>
+   </li>
+   {% if page_obj.has_next %}
+   <li>
+      <span><a href="?page={{ page_obj.next_page_number }}">Next </a></span>
+   </li>
+   {% endif %}
+</ul>
+{% endif %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {{ form.media.js }}
+{% endblock %}

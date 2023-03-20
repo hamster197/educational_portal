@@ -1,0 +1,28 @@
+ {% extends 'main.html' %}
+{% block content %}
+{% for item in items %}
+    {% if item.main_image %}<p>
+
+        <img src="{{ item.main_image.url }}" width="100"  ></p>{% endif %}
+{#    <p> <img src="{{ image.image.url }}" /></p>#}
+    <a href="{% url 'portal_urls:blog_detail_url' slug=item.slug %}">{{ item.name }} </a>
+    <p>{{ item.text|truncatechars:160|safe }}</p>
+{% endfor %}
+{% if is_paginated %}
+<ul class="pagination">
+   {% if page_obj.has_previous %}
+   <li>
+      <span><a href="?page={{ page_obj.previous_page_number }}">Back</a></span>
+   </li>
+   {% endif %}
+   <li class="">
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}. {{ items.count}}</span>
+   </li>
+   {% if page_obj.has_next %}
+   <li>
+      <span><a href="?page={{ page_obj.next_page_number }}">Next</a></span>
+   </li>
+   {% endif %}
+</ul>
+{% endif %}
+{% endblock %}

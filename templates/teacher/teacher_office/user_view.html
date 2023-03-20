@@ -1,0 +1,32 @@
+<div class="uk-child-width-1-2@m" uk-grid>
+   <div>
+      <div class="uk-card uk-card-default">
+         <div class="uk-card-body">
+            <h3 class="uk-card-title">{{ user }}</h3>
+            <p><strong>Дата регистрации</strong> {{ user.date_joined }}</p>
+            <p><strong>Логин</strong> {{ user.username }}</p>
+            <p><strong>Email</strong> {{ user.email }}</p>
+            <p><strong>Кафедра</strong> {{ user.deaprtment_id }}</p>
+            <p><strong>Не опубл. дисциплин</strong> {{ discipline_unpublished.count }}</p>
+            <p><strong>Опубликованные дисциплины</strong> {{ discipline_published.count }}</p>
+         </div>
+      </div>
+   </div>
+   <div>
+      <form  method="post" enctype="multipart/form-data">
+         {% csrf_token %}
+         <div class="uk-card uk-card-default">
+            <div class="uk-card-body">
+               <h3 class="uk-card-title">Кафедры (нажмите для выбора активной кафедры)</h3>
+               <p>
+                  {% for department in user.all_department_id.all %}
+                      <button type="submit" class="uk-button
+                     {% if department == user.deaprtment_id %} uk-button-primary {% else %} uk-button-default {% endif %}
+                     uk-button-large" value="{{ department.pk }}" name="_pk">{{ department }} </button>
+                  {% endfor %}
+               </p>
+            </div>
+         </div>
+      </form>
+   </div>
+</div>

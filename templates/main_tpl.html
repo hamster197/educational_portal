@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru-ru" dir="ltr">
+   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <meta charset="utf-8" />
+
+      <link href="/templates/greenlight/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+      <link href="/templates/greenlight/css/libs/uikit/uikit.theme.css?51575fbed8fcd0a25d4d4389835c2d44" rel="stylesheet" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/css/uikit.min.css" />
+      <!-- UIkit JS -->
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/js/uikit.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.19/dist/js/uikit-icons.min.js"></script>
+   </head>
+   <body class="greenlight com_content uikit">
+      <div class="wrapper">
+      <div>
+      <div data-uk-sticky="media: 960" class="uk-background-primary uk-sticky uk-sticky-fixed">
+         <div class="uk-container uk-container-expand">
+            <nav class="uk-navbar uk-light" data-uk-navbar="" itemscope="itemscope" itemtype="http://www.schema.org/SiteNavigationElement">
+               <div class="uk-navbar-left">
+                  <a class="uk-navbar-item uk-logo" href="/" title="UIkit на русском">
+                  <span class="uk-margin-small-right uk-icon" data-uk-icon="icon: uikit; ratio: 2"></span> My educational Portal </a>
+               </div>
+               <div class="uk-navbar-left">
+                  <a href="#"  class="toggle" data-uk-toggle="target: .toggle; animation: uk-animation-fade">
+                  <span data-uk-tooltip="Свернуть меню" class="uk-margin-small-right uk-icon" data-uk-icon="icon:chevron-double-left; ratio:2;"></span>
+                  </a>
+                  <a href="#" hidden class="toggle" data-uk-toggle="target: .toggle; animation: uk-animation-fade;">
+                  <span data-uk-tooltip="Показать меню" class="uk-margin-small-right uk-icon" data-uk-icon="icon: chevron-double-right; ratio:2;"></span>
+                  </a>
+               </div>
+               <div class="uk-navbar-right">
+                  <div id="modal-full" class="uk-modal-full uk-modal" data-uk-modal>
+                     <div class="uk-modal-dialog uk-overflow-auto uk-flex uk-flex-center uk-flex-middle" data-uk-height-viewport>
+                        <button class="uk-modal-close-full uk-close-large" type="button" data-uk-close></button>
+                     </div>
+                  </div>
+                  {% load flatpages %}
+                  {% get_flatpages as flatpages %}
+                  <div class="moduletable">
+                     <ul itemprop="about" itemscope="" itemtype="http://schema.org/ItemList" class="uk-navbar-nav uk-visible@m  " >
+                        {% for page in flatpages|dictsort:"id" %}
+                        {% if page.pk != 1 %}
+                        <li class="gls-212"  itemprop="name">  <a href="{{ page.url }}">{{ page.title }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+                        <li class="gls-212"  itemprop="name">  <a href="{% url 'portal_urls:blog_list_url' %}">Статьи</a></li>
+                        {% if user.is_authenticated %}
+                        <li class="gls-212"  itemprop="name">  <a href="{% url 'core_urls:logout_url' %}">Выйти({{ user.first_name }} {{ user.last_name }})</a></li>
+                        {% else %}
+                        <li class="gls-212"  itemprop="name">  <a href="{% url 'core_urls:login_url'  %}">Войти</a></li>
+                        {% endif %}
+                     </ul>
+                  </div>
+               </div>
+            </nav>
+         </div>
+      </div>
+      <div data-uk-grid="" class="uk-grid uk-child-width-expand@s">
+      <div class="gls-aside-wide toggle uk-visible@m uk-width-1-5@xl uk-width-1-4@m uk-width-1-4@s" id="gls-aside">
+         <div class="gls-left-menu uk-overflow-auto uk-position-fixed uk-width-1-5">
+            <div class="uk-padding-small">
+               <div class="moduletable">
+                   {% if request.user.groups.get.name == 'teachers' %}
+                        {% include 'teacher/sidebar.html' %}
+                   {% endif %}
+               </div>
+               <div>
+                  <hr>
+               </div>
+            </div>
+         </div>
+      </div>
+      <div class="main-content" id="main-content">
+      <header itemscope="" itemtype="http://schema.org/WPHeader">
+         <nav class="uk-navbar uk-navbar-transparent uk-navbar-container" data-uk-navbar>
+         </nav>
+      </header>
+      <main id="gls-content" class="uk-section uk-section-small uk-section-default">
+      <div class="uk-padding-small uk-padding-remove-vertical uk-position-relative">
+      <!-- Begin Content -->
+      <div id="forajax">
+
+      <div class="gls-content" id="gls-content-container">
+      <div class="item-page  uikit" itemscope itemtype="https://schema.org/Article">
+      <meta itemprop="inLanguage" content="ru-RU" />
+      <div itemprop="articleBody">
+      <div class="uk-section uk-section-small uk-text-center">
+          {% block content %}
+
+          {% endblock %}
+      </div>
+   </body>
+</html>

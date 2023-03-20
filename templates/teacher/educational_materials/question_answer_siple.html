@@ -1,0 +1,9 @@
+{% for answer in question.answer_question_id.all %}
+    <p>{{ answer.ansr_text }}
+        {% if answer.answer_right  %}
+            Правильно
+        {% else %}
+            Неправильно
+        {% endif %}
+    </p>
+{% endfor %}

@@ -1,0 +1,70 @@
+{% extends 'main_tpl.html' %}
+
+{% load widget_tweaks %}
+{% block content %}
+
+<ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+{% if view.type == 'Тема' %}
+    <a href="{% url 'teacher_urls:discipline_edit_url' discipine_pk=view.object.discipline_id.pk %}">Вернуться к дисциплине( {{ view.object.discipline_id }} )</a>
+{% endif %}
+   <form method="POST" >
+    {% csrf_token %}
+    <p class="uk-text-lead"> {{ form.title.label }} {% render_field form.title class="uk-input" %}{{ form.title.errors }}</p>
+    <p class="uk-text-lead"> {{ form.description.label }} {% render_field form.description class="uk-input" %}{{ form.description.errors }}</p>
+    <p class="uk-text-lead"> {{ form.program.label }} {% render_field form.program class="uk-input" %}{{ form.program.errors }}</p>
+    <p class="uk-text-lead"> {{ form.status.label }} {{ form.status }}{{ form.status.errors }}</p>
+   <input class='uk-button uk-button-primary' type='submit' value='Сохранить данные'>
+
+  </form>
+    {% load static %}
+<script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+<script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+</br>
+{% if view.type == 'discipline' %}
+    <p><strong>Кол-во тем в дисциплине {{ discipline.get_themes }}
+        вопросов в тесте {{ discipline.get_quiz_questions }}</strong> </p>
+    <a class="uk-button  uk-button-default uk-button-large"
+       href="{% url 'teacher_urls:discipline_access_new_url' discipine_pk=discipline.pk %}">Добавить доступ дисциплине</a>
+    <strong>Доступы к дисциплине</strong>
+    {%  for discipline_access in discipline.discipline_access_parent_id.all %}
+        <p> {{ discipline_access.group_id }}</p>
+        <p>доступ к дисциплине с {{ discipline_access.discipline_access_start }}, по {{ discipline_access.discipline_access_start }}</p>
+        <p>Kоличество вопросов {{ discipline_access.quiestion_quantity }}, Время сдачи тестов(в минутах) {{ discipline_access.time }}</p>
+        <p>тренировочный тест с {{ discipline_access.test_quize_start }}, по {{ discipline_access.test_quize_end }}</p>
+        <p>итоговый тест с {{ discipline_access.final_quize_start }}, по {{ discipline_access.final_quize_start }}</p>
+        <p><a href="{% url 'teacher_urls:discipline_access_edit_url' pk=discipline_access.pk discipine_pk=discipline.pk %}">Редактировать</a></p>
+    {% endfor %}
+    <strong>Темы</strong>
+        <a class="uk-button  uk-button-default uk-button-large" href="{% url 'teacher_urls:topic_create_url' discipine_pk=view.object.pk %}">Новая тема</a>
+        {% for theme in discipline.topic_discipline_id.all %}
+        <p>{{ theme.title }}</p>
+        <p>вопросов в теме  {{ theme.get_quiz_questions }}</p>
+        <p>пуликация {% if theme.status %} Да {% else %}Нет{% endif %}<a href="{% url 'teacher_urls:topic_edit_url' pk=theme.pk %}">Редактировать</a></p>
+    {% endfor %}
+{% endif %}
+{% if view.type == 'Тема' %}
+    {% if view.object.discipline_id.discipline_access_parent_id.all.count != 0  %}
+        {% if view.object.discipline_id.discipline_access_parent_id.all.count > view.object.topic_access_parent_id.all.count %}
+        <a class="uk-button  uk-button-default uk-button-large"
+       href="{% url 'teacher_urls:topic_access_create_url' discipine_pk=view.object.discipline_id.pk theme_pk=view.object.pk %}">Добавить доступ Тема</a>
+         {% else %}
+            <strong>Добавьте доступ группы к дисциплине!</strong>
+         {% endif %}
+    {% endif %}
+    <a href="{% url 'teacher_urls:question_list_url' topic_pk=view.object.pk discipine_pk=view.object.discipline_id.pk %}">
+             Вопросы  </a></p>
+    {% for instance in view.object.topic_access_parent_id.all %}
+        <p> {{ instance.group_id }} Всего вопросов в теме {{ instance.parent_id.get_quiz_questions }}
+        <p>доступ к теме с {{ instance.discipline_access_start }}, по {{ instance.discipline_access_start }}</p>
+        <p>Kоличество вопросов  в тесте {{ instance.quiestion_quantity }}, Время сдачи тестов(в минутах) {{ instance.time }}</p>
+        <p>тренировочный тест с {{ instance.test_quize_start }}, по {{ instance.test_quize_end }}</p>
+        <p>итоговый тест с {{ instance.final_quize_start }}, по {{ instance.final_quize_start }} {{ instance.parent_id.pk }}</p>
+        <p><a href="{% url 'teacher_urls:topic_access_edit_url' pk=instance.pk discipine_pk=instance.parent_id.pk %}">Редактировать доступ</a></p>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}
