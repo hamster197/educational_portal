@@ -54,5 +54,6 @@ urlpatterns = [
     path('portal/', include('apps.portal.urls')),
     path('core/', include('core.urls')),
     path('teacher/', include('apps.teachers.urls')),
+    path('student/', include('apps.students.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

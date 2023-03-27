@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 
 from apps.educational_materials.models import Discipline
-from core.models import Teacher
+from core.models import Teacher, Student
 from functools import wraps
 from django.core.exceptions import PermissionDenied
 
@@ -20,3 +20,8 @@ def teacher_displine_access(function):
           raise PermissionDenied
 
   return wrap
+
+
+def students_check(user,):
+    if user.groups.all().exists():
+        return Student.objects.filter(pk=user.pk).exists()

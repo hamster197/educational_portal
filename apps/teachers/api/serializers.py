@@ -1,12 +1,11 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import ChoiceField, SerializerMethodField, CurrentUserDefault, CharField
-from rest_framework.relations import StringRelatedField, PrimaryKeyRelatedField
+from rest_framework.fields import ChoiceField, CharField
 from rest_framework.serializers import ModelSerializer, Serializer
 
 from apps.educational_materials.models import Discipline, DisciplineAccess, Topic, TopicVideo, TopicMaterial, \
     TopicAccess, Question, Answer
 from core.api.serializers import StudentGroupQuideSerializer, DepartmentQuideSerializer
-from core.models import MainUser, Teacher, StudentGroupQuide
+from core.models import Teacher, StudentGroupQuide
 
 
 class DisciplineTopicSerializer(ModelSerializer):

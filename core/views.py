@@ -28,6 +28,10 @@ class LoginPage(LoginView):
         self.success_url = 'main'
         if self.request.user.groups.get().name == 'teachers':
             self.success_url = 'teacher_urls:personal_account_url'
+        elif self.request.user.groups.get().name == 'students':
+            self.success_url = 'students_urls:st_personal_account_url'
+        else:
+            self.success_url = 'main'
         return reverse_lazy(self.success_url)
 
 class StudentRegisterPage(CreateView):

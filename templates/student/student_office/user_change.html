@@ -1,5 +1,5 @@
 {% load widget_tweaks %}
- <h1>Редактор профиля преподователя</h1>
+ <h1>Редактор профиля студента</h1>
  <ul class="messages">
    {% for message in messages %}
    <li class="{{ message.tags }}">{{ message|striptags  }}</li>
@@ -12,6 +12,7 @@
     <p class="uk-text-lead"> {{ form.first_name.label }} {% render_field form.first_name class="uk-input" %}{{ form.first_name.errors }}</p>
     <p class="uk-text-lead"> {{ form.patronymic.label }} {% render_field form.patronymic class="uk-input" %}{{ form.patronymic.errors }}</p>
     <p class="uk-text-lead"> {{ form.email.label }} {% render_field form.email class="uk-input" %}{{ form.email.errors }}</p>
+    <p class="uk-text-lead"> {{ form.grade_book_number.label }} {% render_field form.grade_book_number class="uk-input" %}{{ form.grade_book_number.errors }}</p>
        <p class="uk-text-lead"> {{ form.hcaptcha }} {{ form.hcaptcha.errors }}</p>
    <input class='uk-button uk-button-primary' type='submit' value='Изменить данные'>
 

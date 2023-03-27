@@ -1,0 +1,44 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+{% load widget_tweaks %}
+    <p><strong>Дисциплина</strong>
+        {% if instance.get_my_model_name == 'disciplineaccess' %}
+            {{ instance.parent_id }}
+        {% else %}
+            {{ instance.parent_id.discipline_id }} </p>
+            <p><strong>Тема</strong> {{ instance.parent_id}}</p>
+        {% endif %}
+    </p>
+    <p>Кафедра {{ instance.parent_id.department_id }} {{ instance.parent_id.discipline_id.department_id }}</p>
+    <p>Дата начала доступа к материалу c {{ instance.discipline_access_start }} по {{ instance.discipline_access_start }}</p>
+    <p>Дата начала тренировочного теста c {{ instance.test_quize_start }} по {{ instance.test_quize_end }}</p>
+    <p>Дата начала итогового теста c {{ instance.final_quize_start }} по {{ instance.final_quize_end }}</p>
+    <strong>ОПИСАНИЕ </strong>
+        <p>{{ instance.parent_id.description|safe }}</p>
+    {% if instance.parent_id.program %}
+    <strong>ПРОГРАММА </strong>
+    <p> {{ instance.parent_id.program|safe }}</p>
+    {% endif %}
+    {% if instance.parent_id.topic_video_topic_id.all %}
+        <strong>Video</strong>
+        {% for instance in instance.parent_id.topic_video_topic_id.all %}
+            <p> {{ instance.title }}</p>
+            <p> {{ instance.video }}</p>
+            <p> {{ instance.video_link }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if instance.parent_id.topic_video_topic_id.all %}
+        <strong>Materials</strong>
+        {% for instance in instance.parent_id.topic_video_topic_id.all %}
+            <p> {{ instance.title }}</p>
+            <p> {{ instance.topic_material }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if instance.parent_id.get_themes_access.all %}
+        <p>{% with instances=instance.parent_id.get_themes_access %}
+            <strong>Темы</strong>
+           {% include 'student/student_office/instances_list.html' %}
+            {% endwith %}
+        </p>
+    {% endif %}
+{% endblock %}

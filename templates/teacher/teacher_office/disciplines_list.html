@@ -6,8 +6,8 @@
    <p><strong>Название </strong>{{ discipline.title }} </p>
    <p><strong>Группы </strong>
    {% if not discipline.discipline_access_parent_id.all %} N/A {% endif %}
-       {% for discipline in discipline.discipline_access_parent_id.all %}
-        {{ discipline }}
+       {% for group in discipline.discipline_access_parent_id.all %}
+        {{ group }}
        {% endfor %}
            </p>
    <p><strong>Кол-во: тем в дисциплине {{ discipline.get_themes }},

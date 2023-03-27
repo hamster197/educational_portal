@@ -1,0 +1,23 @@
+{% load tz %}
+<div class="uk-flex uk-flex-column uk-width-1-1">
+   {% for instance in instances %}
+   <div class="uk-card uk-card-default uk-card-body uk-margin-top">
+      <p><strong>Название </strong>{{ instance.parent_id.title }} </p>
+      <p><strong>Доступ к материалам:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }}</p>
+      <p><strong>Дата тренировочного теста:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }}</p>
+      <p><strong>Дата итогового теста:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }} </p>
+      {% if instance.parent_id.get_themes %}
+      <p><strong>Кол-во: тем в дисциплине {{ instance.parent_id.get_themes }} </strong> </p>
+      {% endif %}
+      {% now "jS F Y H:i" as todays_date %}
+      {% if todays_date >= instance.discipline_access_start|date:"jS F Y H:i" %}
+      {% if instance.get_my_model_name == 'disciplineaccess' %}
+      <p><a href="{% url 'students_urls:discipline_detail_url' pk=instance.pk %}">Detail</a></p>
+      {% elif instance.get_my_model_name == 'topicaccess' %}
+          <p><a href="{% url 'students_urls:topic_detail_url' pk=instance.pk %}">Detail</a></p>
+      {% endif %}
+      {% endif %}
+   </div>
+</div>
+{% endfor %}
+</div>

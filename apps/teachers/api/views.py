@@ -1,4 +1,3 @@
-#from django.http import Http404
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -314,9 +313,6 @@ class AnswerSequenceViewSet(AnswerObjectMixin):
         except:
             raise ValidationError('Valudation error', )
 
-#############################
-## Add and check for delete aswers
-#############################
 class AnswerFirstColumnComplianceViewSet(AnswerObjectMixin):
     """
             редактирует, удаляет и добавляет тексты ответов к вопросам.

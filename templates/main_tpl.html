@@ -46,6 +46,12 @@
                         {% endfor %}
                         <li class="gls-212"  itemprop="name">  <a href="{% url 'portal_urls:blog_list_url' %}">Статьи</a></li>
                         {% if user.is_authenticated %}
+                    {% if user.groups.get.name == 'students' %}
+                         <li class="gls-212"  itemprop="name"> <a href="{% url 'students_urls:st_personal_account_url' %}">Личный кабинет</a></li>
+                     {% endif %}
+                     {% if user.groups.get.name == 'teachers' %}
+                         <li class="gls-212"  itemprop="name">   <a href="{% url 'teacher_urls:personal_account_url' %}">Личный кабинет</a></li>
+                     {% endif %}
                         <li class="gls-212"  itemprop="name">  <a href="{% url 'core_urls:logout_url' %}">Выйти({{ user.first_name }} {{ user.last_name }})</a></li>
                         {% else %}
                         <li class="gls-212"  itemprop="name">  <a href="{% url 'core_urls:login_url'  %}">Войти</a></li>
@@ -64,6 +70,9 @@
                    {% if request.user.groups.get.name == 'teachers' %}
                         {% include 'teacher/sidebar.html' %}
                    {% endif %}
+{#                   {% if request.user.groups.get.name == 'students' %}#}
+{#                        {% include 'student/sidebar.html' %}#}
+{#                   {% endif %}#}
                </div>
                <div>
                   <hr>

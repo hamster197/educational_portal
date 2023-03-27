@@ -7,8 +7,8 @@ app_name = 'teacher_urls'
 urlpatterns = [
     path('', TeacherPersonalAccount.as_view(), name='personal_account_url'),
     path('change_data/', TeacherPersonalChange.as_view(), name='personal_account_change_url'),
-    path('un_pub_discipline/', TeacherPersonalUnpubDiscipine.as_view(), name='un_pub_discipline_url'),
-    path('pub_discipline/', TeacherPersonalPubDiscipine.as_view(), name='pub_discipline_url'),
+    path('un_pub_discipline/', TeacherDiscipine.as_view(tab='tab2'), name='un_pub_discipline_url'),
+    path('pub_discipline/', TeacherDiscipine.as_view(tab='tab3'), name='pub_discipline_url'),
 
     path('discipine/new/', DiscipineCreate.as_view(), name='discipline_new_url'),
     path('discipine/edit/<int:discipine_pk>/', DiscipineEdit.as_view(), name='discipline_edit_url'),

@@ -20,7 +20,7 @@ admin.site.register(Discipline, DisciplineAdmin)
 
 class ParentAccessAdmin(ModelAdmin):
     list_display = ('pk', 'group_id', 'parent_id', 'quiestion_quantity', 'time', )
-    list_filter = ('parent_id', )
+    list_filter = ('parent_id', 'group_id',)
     search_help_text = 'введите Название материала для поиска'
     #readonly_fields = ['parent_id', ]
 

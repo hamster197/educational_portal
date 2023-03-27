@@ -5,7 +5,7 @@ journals.db
 core/migrations
 core/__pycache__
 core/api/__pycache__
-apps/__pycache__
+app/__pycache__
 apps/educational_materials/migrations
 apps/educational_materials/__pycache__
 apps/educational_materials/api/__pycache__

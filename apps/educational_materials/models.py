@@ -6,20 +6,24 @@ import calendar
 
 from django.utils import timezone
 
-from core.models import StudentGroupQuide, Teacher
+from core.models import StudentGroupQuide, Teacher, Student
 
 
 # Create your models here.
 
+class DisciplineObject(models.Model):
+    creation_date = models.DateTimeField(verbose_name='Дата создания:', auto_now=True, )
+    title = models.CharField(verbose_name='Название темы:', max_length=255, blank=False, unique=True)
+    description = RichTextUploadingField(verbose_name='Текст темы', blank=True, )
+    status = models.BooleanField(verbose_name='Опубликован?', default=False, )
 
-class Discipline(models.Model):
+    class Meta:
+        abstract = True
+
+class Discipline(DisciplineObject):
     department_id = models.ForeignKey('core.DepartmentQuide', verbose_name='Кафедра:', on_delete=models.CASCADE,
                                       related_name='discipline_department_id', null=True, )
-    creation_date = models.DateTimeField(verbose_name='Дата создания:', auto_now=True, )
-    title = models.CharField(verbose_name='Название дисциплины:', max_length=255, blank=False, unique=True)
-    description = RichTextUploadingField(verbose_name='Описание дисциплины:', blank=False, )
     program = RichTextUploadingField(verbose_name='Программа дисциплины:', blank=False, )
-    status = models.BooleanField(verbose_name='Опубликован?', max_length=15, default=False, )
 
     class Meta:
         verbose_name = 'Дисциплинa'
@@ -35,13 +39,16 @@ class Discipline(models.Model):
     def get_themes(self):
         return Topic.objects.filter(discipline_id=self).count()
 
-class Topic(models.Model):
+    def get_themes_access(self):
+        from core.core import get_user_from_request
+        from django.shortcuts import get_object_or_404
+        group = get_object_or_404(Student, pk=get_user_from_request().pk).active_group_id
+        topics = Topic.objects.filter(discipline_id=self, status=True)
+        return TopicAccess.objects.filter(parent_id__in=topics, group_id=group, discipline_access_start__lte=timezone.now())
+
+class Topic(DisciplineObject):
     discipline_id = models.ForeignKey(Discipline, verbose_name='Дисциплинa:', on_delete=models.CASCADE,
                                       related_name='topic_discipline_id', )
-    creation_date = models.DateTimeField(verbose_name='Дата создания:', auto_now=True, )
-    title = models.CharField(verbose_name='Название темы:', max_length=255, blank=False, unique=True)
-    description = RichTextUploadingField(verbose_name='Текст темы', blank=True, )
-    status = models.BooleanField(verbose_name='Опубликован?', default=False, )
 
     class Meta:
         verbose_name = 'Tема'
@@ -94,8 +101,9 @@ class ParentAccess(models.Model):
                                                   calendar.monthrange(timezone.now().year, 12)[1],
                                                                                 month=12))
 
-    quiestion_quantity = models.IntegerField('Kоличество вопросов в тесте ', validators=[MinValueValidator(0)], default=0,)
-    time = models.IntegerField(verbose_name='Время сдачи тестов(в минутах)', default=10,
+    quiestion_quantity = models.PositiveIntegerField('Kоличество вопросов в тесте ', validators=[MinValueValidator(0)],
+                                                     default=0,)
+    time = models.PositiveIntegerField(verbose_name='Время сдачи тестов(в минутах)', default=10,
                                validators=[MinValueValidator(5)],)
 
     test_quize_start = models.DateTimeField(verbose_name='Дата начала тренировочного теста:',
@@ -118,6 +126,9 @@ class ParentAccess(models.Model):
 
     def __str__(self):
         return str(self.parent_id) + ' ( ' + str(self.group_id) + ' ) '
+
+    def get_my_model_name(self):
+        return self._meta.model_name
 
 
     def clean(self):
@@ -253,8 +264,8 @@ class Answer(models.Model):
     question_id = models.ForeignKey(Question, verbose_name='Bопрос', related_name='answer_question_id', on_delete=models.CASCADE)
     ansr_text = RichTextUploadingField(verbose_name='Текст ответа:', max_length=345, blank=False)
     answer_right = models.BooleanField(verbose_name='Ответ верен?', default=False)
-    first_columnn = models.IntegerField(verbose_name='Первый столбец(позиция)', default=0)
-    second_column = models.IntegerField(verbose_name='Второй столбец(позиция)', default=0)
+    first_columnn = models.PositiveIntegerField(verbose_name='Первый столбец(позиция)', default=0)
+    second_column = models.PositiveIntegerField(verbose_name='Второй столбец(позиция)', default=0)
 
     class Meta:
         verbose_name = 'Текст ответа'

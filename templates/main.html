@@ -33,6 +33,9 @@
                      {% if user.groups.get.name == 'teachers' %}
                          <a href="{% url 'teacher_urls:personal_account_url' %}">Личный кабинет</a>
                      {% endif %}
+                     {% if user.groups.get.name == 'students' %}
+                         <a href="{% url 'students_urls:st_personal_account_url' %}">Личный кабинет</a>
+                     {% endif %}
                      <a href="{% url 'core_urls:logout_url' %}">Выйти({{ user.first_name }} {{ user.last_name }})</a>
                      {% else %}
                      <a href="{% url 'core_urls:login_url'  %}">Войти</a>

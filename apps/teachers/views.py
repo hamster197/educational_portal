@@ -40,8 +40,13 @@ class TeacherPersonalAccount(PersonalAccount, TemplateView):
 
     def post(self, request, *args, **kwargs):
         teacher = self.get_context_data().get('user')
-        teacher.deaprtment_id = get_object_or_404(DepartmentQuide, pk=self.request.POST.get('_pk'))
-        teacher.save()
+        if self.request.POST.get('_pk').isdigit():
+            if DepartmentQuide.objects.filter(pk=self.request.POST.get('_pk')).exists():
+                department = DepartmentQuide.objects.get(pk=self.request.POST.get('_pk'))
+                if department in teacher.all_department_id.all():
+                    teacher.deaprtment_id = department
+                    teacher.save()
+
         return redirect('teacher_urls:personal_account_url')
 
 @method_decorator(teachers_decorators, name='dispatch')
@@ -75,23 +80,17 @@ class TeacherPersonalChange(PersonalAccount, UpdateView):
         return super().post(request, *args, **kwargs)
 
 @method_decorator(teachers_decorators, name='dispatch')
-class TeacherPersonalUnpubDiscipine(PersonalAccount, TemplateView):
-    tab = 'tab2'
+class TeacherDiscipine(PersonalAccount, TemplateView):
+    tab = ''
 
     def get_context_data(self, **kwargs):
-        context = super(TeacherPersonalUnpubDiscipine, self).get_context_data(**kwargs, )
-        context['disciplines'] = context.get('discipline_unpublished')
+        context = super(TeacherDiscipine, self).get_context_data(**kwargs, )
+        if self.tab == 'tab2':
+            context['disciplines'] = context.get('discipline_unpublished')
+        elif self.tab == 'tab3':
+            context['disciplines'] = context.get('discipline_published')
         return context
 
-
-@method_decorator(teachers_decorators, name='dispatch')
-class TeacherPersonalPubDiscipine(PersonalAccount, TemplateView):
-    tab = 'tab3'
-
-    def get_context_data(self, **kwargs):
-        context = super(TeacherPersonalPubDiscipine, self).get_context_data(**kwargs, )
-        context['disciplines'] = context.get('discipline_published')
-        return context
 
 @method_decorator(teachers_decorators, name='dispatch')
 class DiscipineCreate(CreateView):

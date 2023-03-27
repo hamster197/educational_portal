@@ -1,0 +1,26 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+<div class="uk-flex-center uk-tab">
+   <a class="uk-button
+      {% if view.tab == 'tab1' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'students_urls:st_personal_account_url'  %}">Профиль </a>
+   <a class="uk-button
+      {% if view.tab == 'tab2' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'students_urls:discipline_aviable_url'  %}">
+                       Текущие дисциплины ({{ discipline_aviable.count }})</a>
+   <a class="uk-button
+      {% if view.tab == 'tab3' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'students_urls:discipline_unaviable_url'  %}">
+                        Пройденные дисциплины ({{ discipline_unaviable.count }})</a>
+
+   <a class="uk-button {% if view.tab == 'tab4' %} uk-button-primary {% else %} uk-button-default {% endif %}
+      uk-button-large" href="{% url 'students_urls:st_personal_account_change_url'  %}">Изменить профиль</a>
+</div>
+<div class="uk-flex-center uk-tab">
+{% if view.tab == 'tab1' %}{% include 'student/student_office/user_view.html' %}
+{% elif view.tab == 'tab4' %}{% include 'student/student_office/user_change.html' %}
+ {% else %}
+    {% include 'student/student_office/instances_list.html' %}
+{% endif %}
+</div>
+{% endblock %}
