@@ -109,9 +109,11 @@ class DiscipineDetail(DetailView):
 class TopicDetail(DiscipineDetail):
 
     def get_queryset(self):
+
         group_id = get_object_or_404(Student, username=self.request.user.username).active_group_id
         quesryset = TopicAccess.objects.filter(group_id=group_id, parent_id__status=True,
-                                                    discipline_access_start__lte=timezone.now())
+                                               parent_id__discipline_id__status=True,
+                                               discipline_access_start__lte=timezone.now())
 
         return quesryset
 

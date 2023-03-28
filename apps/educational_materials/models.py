@@ -131,16 +131,17 @@ class ParentAccess(models.Model):
         return self._meta.model_name
 
 
-    def clean(self):
+    def my_clean(self):
         errors = {}
         if self.discipline_access_start >= self.discipline_access_end:
-            errors['discipline_access_start'] = 'Дата доступа к дисциплине( неправильный промежуток )'
+            errors['discipline_access_start'] = 'Дата доступа к материалу(Дисплины или Темы)( неправильный промежуток )'
         if self.test_quize_start >= self.test_quize_end:
             errors['test_quize_start'] = 'Дата доступа тренировочного теста( неправильный промежуток )'
         if self.final_quize_start >= self.final_quize_end:
             errors['final_quize_start'] = 'Дата доступа итогового теста( неправильный промежуток )'
-        if errors:
-            raise ValidationError(errors)
+        if self.test_quize_end > self.final_quize_start:
+            errors['final_quize_start'] = 'Дата тренировочного теста больше даты начала итогового теста( неправильный промежуток )'
+        return errors
 
 
 error_string = 'Дата доступа к материалу(Дисплины или Темы) - неправильный промежуток '
@@ -165,7 +166,7 @@ class DisciplineAccess(ParentAccess):
         return super(DisciplineAccess, self).save(**kwargs)
 
     def clean(self):
-        errors = {}
+        errors = self.my_clean()
         self.validate_unique()
         if self.discipline_access_start > self.test_quize_start:
             errors['test_quize_start'] = error_string
@@ -203,7 +204,7 @@ class TopicAccess(ParentAccess):
         return super(TopicAccess, self).save(**kwargs)
 
     def clean(self):
-        errors = {}
+        errors = self.my_clean()
         if self.group_id is not None:
             if not DisciplineAccess.objects.filter(parent_id=self.parent_id.discipline_id,
                                                    group_id=self.group_id).exists():
