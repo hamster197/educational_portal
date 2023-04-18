@@ -1,0 +1,30 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+    {#    add  interface for photo logs #}
+
+<h3 class="stom-card-title">Ваш результат: </h3>
+<b>ФИО:</b> {{ student.last_name }} {{ student.first_name }} {{ student.patronymic }}<br>
+<b>Cтудент :</b>{{ student.active_group_id }} ( {{ student.active_group_id.faculty_id }} )<br>
+{% if view.quize_status %}итоговый {% else %}тренировочный </b>
+   {% endif %}тест
+   {% if instance.get_my_model_name == 'disciplineaccess' %} дисциплины
+   {% elif instance.get_my_model_name == 'topicaccess' %} лекции
+   {% endif %}
+   <b class="success-text">{{ instance.parent_id }}
+   {% if instance.parent_id.discipline_id %}
+   дисциплины {{ instance.parent_id.discipline_id }}
+   {% endif %}
+   </b>
+    <h1>{{ timeout }}</h1>
+ <p>Правильно отвеченно {{ estimation.get_correct_answers }} из {{ instance.quiestion_quantity }} вопросов
+      ( {{ estimation.get_correct_answers_percent }}  %  {{ estimation.get_estimation }}
+     {%  if estimation.get_estimation == 5 %} баллов {% else %} балла{% endif %})
+ </p>
+
+   {% if instance.get_my_model_name == 'disciplineaccess' %}
+       <li class="gls-116"  itemprop="name"><a itemprop="url"  href="{% url 'students_urls:discipline_detail_url' pk=instance.pk %}" >Вернуться к дисциплинe</a></li>
+   {% elif instance.get_my_model_name == 'topicaccess' %}
+       <li class="gls-116"  itemprop="name"><a itemprop="url"  href="{% url 'students_urls:topic_detail_url' pk=instance.pk %}" >Вернуться к лекции</a></li>
+   {% endif %}
+
+{% endblock %}

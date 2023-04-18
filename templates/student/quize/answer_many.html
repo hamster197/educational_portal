@@ -1,0 +1,8 @@
+{% for answer in answers %}
+<li><label class="checkbox-wrap is-small">
+{#   <input  type="checkbox"  class="d-checkbox" name="read{{ answer.pk }}" id="read{{ answer.pk }}" value="yes" /><span></span>#}
+   <input  type="checkbox"  class="d-checkbox" name="_answers" value="{{ answer.pk }}" /><span></span>
+
+   {{ answer.ansr_text|safe }} </label>
+</li>
+{% endfor %}

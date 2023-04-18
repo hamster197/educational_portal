@@ -12,5 +12,17 @@ urlpatterns = [
     path('discipline_detail/<int:pk>/', DiscipineDetail.as_view(), name='discipline_detail_url'),
     path('topic_detail/<int:pk>/', TopicDetail.as_view(), name='topic_detail_url'),
 
+    path('decepline/quize/approval/<int:pk>/', QuizeApproval.as_view(model=DisciplineAccess),
+         name='decepline_quize_approval_url'),
+    path('topic/quize/approval/<int:pk>/', QuizeApproval.as_view(model=TopicAccess), name='topic_quize_approval_url'),
+
+    path('decepline/quize/rezult/<int:pk>/', QuizeRezult.as_view(model=DisciplineAccess),
+         name='decepline_quize_rezult_url'),
+    path('topic/quize/rezult/<int:pk>/', QuizeRezult.as_view(model=TopicAccess), name='topic_quize_rezult_url'),
+
+    path('decepline/quize/test/<int:pk>/', QuizeTest.as_view(model=DisciplineAccess),
+         name='decepline_quize_test_url'),
+    path('topic/quize/test/<int:pk>/', QuizeTest.as_view(model=TopicAccess), name='topic_quize_test_url'),
+
     #path('api/v1/', include('apps.teachers.api.urls'),)
 ]

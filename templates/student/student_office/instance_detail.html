@@ -19,6 +19,13 @@
     <strong>ПРОГРАММА </strong>
     <p> {{ instance.parent_id.program|safe }}</p>
     {% endif %}
+         {% if instance.get_my_model_name == 'disciplineaccess' %}
+              <p><a href="{% url 'students_urls:decepline_quize_approval_url' pk=instance.pk %}">
+                  Сдать {% if instance.get_quize_access == 'final_quize' %}итоговый{% else %}тренировочный{% endif %} тест</a></p>
+          {% elif instance.get_my_model_name == 'topicaccess' %}
+              <p><a href="{% url 'students_urls:topic_quize_approval_url' pk=instance.pk %}">
+                  Сдать {% if instance.get_quize_access == 'final_quize' %}итоговый{% else %}тренировочный{% endif %} тест</a></p>
+          {% endif %}
     {% if instance.parent_id.topic_video_topic_id.all %}
         <strong>Video</strong>
         {% for instance in instance.parent_id.topic_video_topic_id.all %}

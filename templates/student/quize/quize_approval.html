@@ -1,0 +1,26 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+    {#    add  interface for photo logs #}
+<p>Нажимая кнопку <b class="accent-text">"Начать {% if quiz_flag != 'lection' %}{{  quiz_flag }}{% endif %} тест"</b>
+   я подтвеждаю, что действительно являюсь:
+</p>
+<b>ФИО:</b> {{ student.last_name }} {{ student.first_name }} {{ student.patronymic }}<br>
+<b>Cтудент :</b>{{ student.active_group_id }} ( {{ student.active_group_id.faculty_id }} )<br>
+
+<p> И желаю пройти {% if view.quize_status %}итоговый {% else %}тренировочный </b>
+   {% endif %}тест
+   {% if instance.get_my_model_name == 'disciplineaccess' %} дисциплины
+   {% elif instance.get_my_model_name == 'topicaccess' %} лекции
+   {% endif %}
+   <b class="success-text">{{ instance.parent_id }}
+   {% if instance.parent_id.discipline_id %}
+   дисциплины {{ instance.parent_id.discipline_id }}
+   {% endif %}
+   </b>
+</p>
+</p>
+<form method="post" >{% csrf_token %}
+   <button type="submit" name="_quiz_final_start" class="button btn-align accent-btn btn-outlined rounded">Начать
+   {% if quiz_flag != 'lection' %}{{  quiz_flag }}{% endif %} тест</button>
+</form>
+{% endblock %}

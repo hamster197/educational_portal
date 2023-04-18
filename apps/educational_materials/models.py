@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 import calendar
 
+from django.urls import reverse
 from django.utils import timezone
 
 from core.models import StudentGroupQuide, Teacher, Student
@@ -11,7 +12,7 @@ from core.models import StudentGroupQuide, Teacher, Student
 
 # Create your models here.
 
-class DisciplineObject(models.Model):
+class MatherialObject(models.Model):
     creation_date = models.DateTimeField(verbose_name='Дата создания:', auto_now=True, )
     title = models.CharField(verbose_name='Название темы:', max_length=255, blank=False, unique=True)
     description = RichTextUploadingField(verbose_name='Текст темы', blank=True, )
@@ -20,7 +21,7 @@ class DisciplineObject(models.Model):
     class Meta:
         abstract = True
 
-class Discipline(DisciplineObject):
+class Discipline(MatherialObject):
     department_id = models.ForeignKey('core.DepartmentQuide', verbose_name='Кафедра:', on_delete=models.CASCADE,
                                       related_name='discipline_department_id', null=True, )
     program = RichTextUploadingField(verbose_name='Программа дисциплины:', blank=False, )
@@ -46,7 +47,7 @@ class Discipline(DisciplineObject):
         topics = Topic.objects.filter(discipline_id=self, status=True)
         return TopicAccess.objects.filter(parent_id__in=topics, group_id=group, discipline_access_start__lte=timezone.now())
 
-class Topic(DisciplineObject):
+class Topic(MatherialObject):
     discipline_id = models.ForeignKey(Discipline, verbose_name='Дисциплинa:', on_delete=models.CASCADE,
                                       related_name='topic_discipline_id', )
 
@@ -101,7 +102,7 @@ class ParentAccess(models.Model):
                                                   calendar.monthrange(timezone.now().year, 12)[1],
                                                                                 month=12))
 
-    quiestion_quantity = models.PositiveIntegerField('Kоличество вопросов в тесте ', validators=[MinValueValidator(0)],
+    quiestion_quantity = models.PositiveIntegerField('Kоличество вопросов в тесте ',
                                                      default=0,)
     time = models.PositiveIntegerField(verbose_name='Время сдачи тестов(в минутах)', default=10,
                                validators=[MinValueValidator(5)],)
@@ -130,6 +131,25 @@ class ParentAccess(models.Model):
     def get_my_model_name(self):
         return self._meta.model_name
 
+    def get_quize_access(self):
+        from core.core import get_user_from_request
+        from apps.students.models import QuizeRezultDecepline, QuizeRezultTopic
+        instance_model = None
+        if self._meta.model_name == 'disciplineaccess':
+            instance_model = QuizeRezultDecepline
+        if self._meta.model_name == 'topicaccess':
+            instance_model = QuizeRezultTopic
+        quize_rezult = instance_model.objects.filter(parent_id=self, user=get_user_from_request(),
+                                                    ended_quize=True)
+        if quize_rezult.filter(final_quize=True,).exists():
+            return 'Итоговый тест сдан с оценкой ' + str(quize_rezult.first().get_estimation())
+        elif quize_rezult.filter(final_quize=False,).exists() and self.final_quize_start > timezone.now():
+            return 'Тренировочный тест сдан с оценкой ' + str(quize_rezult.first().get_estimation())
+        if self.final_quize_start <= timezone.now() and self.final_quize_end > timezone.now():
+            return 'final_quize'
+        if self.test_quize_start <= timezone.now() and self.test_quize_end > timezone.now():
+            return 'trainy_quize'
+
 
     def my_clean(self):
         errors = {}
@@ -143,6 +163,9 @@ class ParentAccess(models.Model):
             errors['final_quize_start'] = 'Дата тренировочного теста больше даты начала итогового теста( неправильный промежуток )'
         return errors
 
+    def __str__(self):
+        return str(self.parent_id) +' ( ' + str(self.group_id) + ' )'
+
 
 error_string = 'Дата доступа к материалу(Дисплины или Темы) - неправильный промежуток '
 
@@ -152,8 +175,6 @@ class DisciplineAccess(ParentAccess):
     group_id = models.ForeignKey(StudentGroupQuide, verbose_name='Группа:', on_delete=models.CASCADE,
                                       related_name='discipline_access_group_id', null=True)
 
-    def __str__(self):
-        return str(self.group_id)
 
     class Meta:
         verbose_name = 'Дисциплинa(Доступы групп)'
@@ -182,6 +203,12 @@ class DisciplineAccess(ParentAccess):
         if errors:
             raise ValidationError(errors)
 
+    def get_absolute_url(self):
+        return reverse('students_urls:decepline_quize_rezult_url', kwargs={'pk': self.get_object().pk})
+
+    def get_testing_url(self):
+        return reverse('students_urls:decepline_quize_test_url', kwargs={'pk': self.get_object().pk})
+
 
 
 class TopicAccess(ParentAccess):
@@ -190,12 +217,10 @@ class TopicAccess(ParentAccess):
     group_id = models.ForeignKey(StudentGroupQuide, verbose_name='Группа:1', on_delete=models.CASCADE,
                                       related_name='topic_access_group_id', null=True)
 
-    def __str__(self):
-        return str(self.group_id)
 
     class Meta:
         verbose_name = 'Тема(Доступы групп)'
-        verbose_name_plural = 'Тема(Доступы групп)'
+        verbose_name_plural = 'Темы(Доступы групп)'
         unique_together = ['parent_id', 'group_id']
         ordering = ['-pk']
 
@@ -237,8 +262,14 @@ class TopicAccess(ParentAccess):
         if errors:
             raise ValidationError(errors)
 
+    def get_rezult_url(self):
+        return reverse('students_urls:topic_quize_rezult_url', kwargs={'pk': self.get_object().pk})
+
+    def get_testing_url(self):
+        return reverse('students_urls:topic_quize_test_url', kwargs={'pk': self.get_object().pk})
+
 class Question(models.Model):
-    topic_access = models.ManyToManyField(Topic, related_name='question_topic_access_id', verbose_name='Доступ к теме:',)
+    topic_access = models.ManyToManyField(Topic, related_name='question_topic_access_id', verbose_name='Доступ к теме:',)#question_topic_access_id
     question_text = RichTextUploadingField(verbose_name='Текст вопроса:', max_length=5000, blank=False)
     image = models.ImageField(verbose_name='Фото:', upload_to='image/quize/', blank=True)
     variants_type_choises = (('Тест один правильный ответ', 'Тест один правильный ответ'),

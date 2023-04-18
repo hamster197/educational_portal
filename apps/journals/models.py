@@ -1,8 +1,7 @@
 from django.db import models
 
-from apps.educational_materials.models import Discipline
-from core.models import MainUser
-
+from apps.educational_materials.models import Discipline, DisciplineAccess, TopicAccess
+from core.models import MainUser, Student
 
 #Create your models here.
 material_type_choises = (('Tемa','Tемa'),('Дисциплинa','Дисциплинa'),
@@ -30,3 +29,35 @@ class QuestionsCopyJournal(models.Model):
         app_label = 'journals'
         verbose_name = 'Журнал копирования Вопросов'
         verbose_name_plural = 'Журнал копирования Вопросов'
+
+class QuizeLogObject(models.Model):
+    creation_date = models.DateTimeField('Дата создания', auto_now=True)
+    question_id = models.PositiveIntegerField('Вопрос(pk)', )
+    user_id = models.PositiveIntegerField('Студент(pk)', )
+    user_full_name = models.CharField('Студент', max_length=155 )
+    answer_right = models.BooleanField('Ответ верен?', default=False)
+    test_type = models.BooleanField('Итоговый тест??', default=False)
+    image = models.ImageField('Photo', upload_to='quize_log/%Y/%m/%d/', blank=True)
+
+    class Meta:
+        app_label = 'journals'
+        abstract = True
+
+class QuizeLogDeciplineJournal(QuizeLogObject):
+    parent_id = models.PositiveIntegerField('Дисциплинa(Доступы групп)(pk)',)
+    parent_name = models.CharField('Дисциплинa(Доступы групп)', max_length=255)
+
+    class Meta:
+        app_label = 'journals'
+        verbose_name = 'Журнал сдачи тестов Дисциплин'
+        verbose_name_plural = 'Журнал сдачи тестов Дисциплин'
+
+class QuizeLogTopicJournal(QuizeLogObject):
+    parent_id = models.PositiveIntegerField('Тема(Доступы групп)(pk)', )
+    parent_name = models.CharField('Тема(Доступы групп)', max_length=255)
+
+
+    class Meta:
+        app_label = 'journals'
+        verbose_name = 'Журнал сдачи тестов Тем'
+        verbose_name_plural = 'Журнал сдачи тестов Тем'

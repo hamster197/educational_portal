@@ -31,3 +31,23 @@ class QuestionsCopyJournalAdmin(ModelAdmin):
         return False
 
 admin.site.register(QuestionsCopyJournal, QuestionsCopyJournalAdmin)
+
+class QuizeLogJournalAdmin(ModelAdmin):
+    list_display = ('pk', 'creation_date', 'user_id', 'user_full_name', 'parent_name', 'test_type', 'answer_right')
+    list_filter = ('parent_name', )
+    search_fields = ('user_id', )
+    search_help_text = 'введите User pk для поиска'
+    # readonly_fields = '__all__'#('author', 'action', 'from_theme', )
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+admin.site.register(QuizeLogDeciplineJournal, QuizeLogJournalAdmin)
+
+admin.site.register(QuizeLogTopicJournal, QuizeLogJournalAdmin)

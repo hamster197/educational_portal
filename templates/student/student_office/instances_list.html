@@ -4,11 +4,24 @@
    <div class="uk-card uk-card-default uk-card-body uk-margin-top">
       <p><strong>Название </strong>{{ instance.parent_id.title }} </p>
       <p><strong>Доступ к материалам:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }}</p>
-      <p><strong>Дата тренировочного теста:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }}</p>
-      <p><strong>Дата итогового теста:</strong>с {{ instance.discipline_access_start }} по  {{ instance.discipline_access_end }} </p>
+      <p><strong>Дата тренировочного теста:</strong>с {{ instance.test_quize_start }} по  {{ instance.test_quize_end }}</p>
+      <p><strong>Дата итогового теста:</strong>с {{ instance.final_quize_start }} по  {{ instance.final_quize_end }} </p>
       {% if instance.parent_id.get_themes %}
       <p><strong>Кол-во: тем в дисциплине {{ instance.parent_id.get_themes }} </strong> </p>
       {% endif %}
+         <p>
+      {% if 'quize' in instance.get_quize_access %}
+          {% if instance.get_my_model_name == 'disciplineaccess' %}
+              <p><a href="{% url 'students_urls:decepline_quize_approval_url' pk=instance.pk %}">
+                  Сдать {% if instance.get_quize_access == 'final_quize' %}итоговый{% else %}тренировочный{% endif %} тест</a></p>
+          {% elif instance.get_my_model_name == 'topicaccess' %}
+              <p><a href="{% url 'students_urls:topic_quize_approval_url' pk=instance.pk %}">
+                  Сдать {% if instance.get_quize_access == 'final_quize' %}итоговый{% else %}тренировочный{% endif %} тест</a></p>
+          {% endif %}
+      {% else %}
+          {{ instance.get_quize_access }}
+      {% endif %}
+      </p>
       {% now "jS F Y H:i" as todays_date %}
       {% if todays_date >= instance.discipline_access_start|date:"jS F Y H:i" %}
       {% if instance.get_my_model_name == 'disciplineaccess' %}

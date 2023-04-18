@@ -1,0 +1,30 @@
+{% extends 'main_tpl.html' %}
+{% block content %} {{ quize_rezult.current_question.pk }}
+{% if view.quize_status %}итоговый {% else %}тренировочный </b>
+   {% endif %}тест
+   {% if instance.get_my_model_name == 'disciplineaccess' %} дисциплины
+   {% elif instance.get_my_model_name == 'topicaccess' %} лекции
+   {% endif %}
+   <b class="success-text">{{ instance.parent_id }}
+   {% if instance.parent_id.discipline_id %}
+   дисциплины {{ instance.parent_id.discipline_id }}
+   {% endif %}
+   </b>
+    <strong>вопрос {{  quize_rezult.get_user_questions.count|add:'1' }} из {{ instance.quiestion_quantity }} timer {{ timer }}</strong>
+    <p> {{ quize_rezult.current_question.variants_type }} </p>
+    <p>question text {{ quize_rezult.current_question|safe }} </p>
+    {% if quize_rezult.current_question.image %}<p>question text {{ quize_rezult.current_question.image.url }} </p>{% endif %}
+    <form class="post-form" method="post"  enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if quize_rezult.current_question.variants_type == 'Тест один правильный ответ' %}
+        {% include 'student/quize/answer_one.html' %}
+    {% elif quize_rezult.current_question.variants_type == 'Тест несколько правильных ответов' %}
+        {% include 'student/quize/answer_many.html' %}
+    {% elif quize_rezult.current_question.variants_type == 'Тест на последовательность' %}
+        {% include 'student/quize/answer_sequence.html' %}
+    {% elif quize_rezult.current_question.variants_type == 'Тест на соответствие' %}
+        {% include 'student/quize/answer_compliance.html' %}
+    {% endif %}
+    <button type="submit" name="_next_question" class="button btn-align secondary-btn raised"> Cледующий вопрос</button>
+    </form>
+{% endblock %}
