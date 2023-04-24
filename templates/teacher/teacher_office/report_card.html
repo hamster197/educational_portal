@@ -1,0 +1,38 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+{% load widget_tweaks %}
+{% load teacher_extras %}
+ <ul class="messages">
+   {% for message in messages %}
+   <li class="{{ message.tags }}">{{ message|striptags  }}</li>
+   {% endfor %}
+</ul>
+  <h2>Decipline {% if access.parent_id.discipline_id  %}  {{ access.parent_id.discipline_id }} topic {% endif %}
+      {{ access }}</h2>
+ <h1>ReportCard({{ access.quiestion_quantity }} Questions in test )
+     {% if final_quize_status == True %} Final {% else %} Trainy  {% endif %} quize</h1>
+    <h2>{% if final_quize_status == True %}
+        from {{ access.final_quize_start }} to {{ access.final_quize_end }}
+        {% else %}
+        from {{ access.test_quize_start }} to {{ access.test_quize_end }}
+        {% endif %}
+    </h2>
+        <form class="post-form" method="post"  enctype="multipart/form-data">
+        {% csrf_token %}
+    {% for cart in report_cart %}
+        <p>{{ cart }}
+          {%  if cart.user_rezult_pk %}
+              testing was started in {{ cart.quize_started_it }}
+              {% get_quize_rezult all_users_rezults cart.user_rezult_pk %}
+              {% if access.parent_id.discipline_id  %}
+                  <p><a href="{% url 'teacher_urls:report_card_topic_detail_url' pk=access.pk user_pk=cart.pk %}">Detail</a>
+              {% else %}
+                  <p><a href="{% url 'teacher_urls:report_card_discipine_detail_url' pk=access.pk user_pk=cart.pk %}">Detail</a>
+              {% endif %}
+                  <button type="submit" name="_retake_quize" value='{{ cart.pk }}' class="button btn-align secondary-btn raised"> retake_quize </button>
+        {% else %} N/A
+          {% endif %}</p>
+    {% endfor %}
+        </form>
+
+{% endblock %}

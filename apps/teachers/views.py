@@ -3,11 +3,12 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import TemplateView, UpdateView, CreateView, RedirectView, FormView
+from django.views.generic import TemplateView, UpdateView, CreateView, RedirectView, FormView, DetailView
 from django_filters.views import FilterView
 from extra_views import CreateWithInlinesView, UpdateWithInlinesView, InlineFormSetFactory
 
-from apps.teachers.core import questions_copy_core
+from apps.students.models import QuizeRezultTopic, QuizeRezultDecepline
+from apps.teachers.core import questions_copy_core, get_report_card_queryset, get_final_quize_status
 from apps.teachers.filters import QuestionFilter
 from apps.teachers.forms import *
 from core.decorators import teachers_check, teacher_displine_access
@@ -423,6 +424,7 @@ class QuestionSequenceComplianceCreate(CreateView, ):
             url = 'teacher_urls:question_edit_sequence_url'
         elif self.question_type == 'Тест на соответствие':
             url = 'teacher_urls:question_edit_compliance_url'
+
         return reverse_lazy(url, kwargs={'discipine_pk': topic.discipline_id.pk, 'topic_pk': topic.pk,'pk': self.object.pk})
 
 @method_decorator(teachers_decorators_descepline, name='dispatch')
@@ -494,6 +496,59 @@ class QuestionComplianceEdit(UpdateView):
     def get_success_url(self):
         return reverse_lazy('teacher_urls:question_edit_compliance_url', kwargs={'discipine_pk': self.topic.discipline_id.pk,
                                                                                'topic_pk': self.topic.pk,'pk': self.object.pk})
+
+
+@method_decorator(user_passes_test(teachers_check), name='dispatch')
+class ReportCard(DetailView):
+    template_name = 'teacher/teacher_office/report_card.html'
+    context_object_name = 'access'
+    quize_type = ''
+    action = 'List'
+    def get_queryset(self):
+        return get_report_card_queryset(self)
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportCard, self).get_context_data(**kwargs,)
+        from django.db.models import Subquery, OuterRef
+        context['final_quize_status'] = get_final_quize_status(self)
+        context['all_users_rezults'] = self.quize_type.objects.filter(parent_id=self.object, ended_quize=True,
+                                                                      final_quize=context['final_quize_status'])
+        all_users_rezults_subquery = context['all_users_rezults'].filter(user=OuterRef("pk"),)
+
+        if self.object.group_id:
+            user_rezults = Student.objects.filter(active_group_id=self.object.group_id, ) \
+                .annotate(user_rezult_pk=Subquery(all_users_rezults_subquery.values('pk')),
+                          quize_started_it=Subquery(all_users_rezults_subquery.values('quize_started_it')))
+            context['report_cart'] = user_rezults
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.action == 'List':
+            if '_retake_quize' in self.request.POST:
+                self.quize_type.objects.get(user__pk=self.request.POST.get('_retake_quize'),\
+                                                  parent_id=self.object).delete()
+
+        user = Student.objects.get(pk=self.request.POST.get('_retake_quize'))
+        messages.success(self.request, (user.first_name + ' ' + user.last_name + ' was sented to retake a quize'))
+        if self.quize_type == QuizeRezultDecepline:
+            return redirect('teacher_urls:report_card_discipine_url', pk=self.object.pk)
+        elif self.quize_type == QuizeRezultTopic:
+            return redirect('teacher_urls:report_card_topic_url', pk=self.object.pk)
+
+class ReportCardDetail(ReportCard):
+    template_name = 'teacher/teacher_office/report_card_detail.html'
+    quize_log_type = ''
+    action = 'Detail'
+
+    def get_context_data(self, **kwargs):
+        context = super(ReportCard, self).get_context_data(**kwargs,)
+        if self.quize_type.objects.filter(user__pk=self.kwargs['user_pk'], parent_id=self.object).exists():
+            context['rezult'] = self.quize_type.objects.get(user__pk=self.kwargs['user_pk'], parent_id=self.object)
+            context['log'] = self.quize_log_type.objects.filter(user_id=self.kwargs['user_pk'], parent_id=self.object.pk,
+                                                                test_type=get_final_quize_status(self))
+        return context
 
 
 

@@ -130,7 +130,8 @@ class QuizeObject(DetailView):
         self.request = request
         self.args = args
         self.kwargs = kwargs
-        if get_for_aviable_quize_access(self, ).filter(final_quize_start__lte=self.now, final_quize_end__gte=self.now).exists():
+        if get_for_aviable_quize_access(self, ).filter(final_quize_start__lte=self.now, \
+                                                       final_quize_end__gte=self.now).exists():
             self.quize_status = True
 
     def get_context_data(self, **kwargs):
@@ -174,6 +175,7 @@ class QuizeRezult(QuizeObject):
                 quize_topic_rezult_topic_id__user=self.request.user,)
 
         return queryset
+
     def get_context_data(self, **kwargs):
         context = super(QuizeRezult, self).get_context_data(**kwargs)
         if get_timer(self) <= 0:

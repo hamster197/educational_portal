@@ -12,7 +12,7 @@ class QuizeRezultObject(models.Model):
     current_question = models.ForeignKey(Question, verbose_name='Tекущий вопрос', on_delete=models.CASCADE, null=True,)
     final_quize = models.BooleanField('Итоговый тест?', default=False)
     ended_quize = models.BooleanField('Тест сдавался?', default=False)
-    quize_started_it = models.DateTimeField('Дата начала сдачи теста(seconds)', null=True)
+    quize_started_it = models.DateTimeField('Дата начала сдачи теста(seconds)', null=True, )
 
 
     class Meta:
@@ -25,8 +25,10 @@ class QuizeRezultObject(models.Model):
             quize_rezults = QuizeLogTopicJournal
         return quize_rezults.objects.filter(parent_id=self.parent_id.pk, user_id=self.user.pk)
 
+
     def get_correct_answers(self):
         return self.get_user_questions().filter(answer_right=True).count()
+
 
     def get_correct_answers_percent(self):
         if self.parent_id.quiestion_quantity != 0:
@@ -43,7 +45,12 @@ class QuizeRezultObject(models.Model):
             estimation = 4
         elif correct_answers_percent >= 91 and correct_answers_percent <= 100:
             estimation = 5
+
         return estimation
+
+    def __str__(self):
+        print('1')
+        return self.user
 
 class QuizeRezultDecepline(QuizeRezultObject):
     parent_id = models.ForeignKey(DisciplineAccess, verbose_name='Дисциплинa:', on_delete=models.CASCADE,
@@ -54,6 +61,7 @@ class QuizeRezultDecepline(QuizeRezultObject):
         verbose_name_plural = 'Дисциплины(Результат тестов)'
         unique_together = ['parent_id', 'user', ]
 
+
 class QuizeRezultTopic(QuizeRezultObject):
     parent_id = models.ForeignKey(TopicAccess, verbose_name='Тема:', on_delete=models.CASCADE,
                                   related_name='quize_topic_rezult_topic_id', )
@@ -62,3 +70,4 @@ class QuizeRezultTopic(QuizeRezultObject):
         verbose_name = 'Тема(Результат теста)'
         verbose_name_plural = 'Темы(Результат тестов)'
         unique_together = ['parent_id', 'user', ]
+

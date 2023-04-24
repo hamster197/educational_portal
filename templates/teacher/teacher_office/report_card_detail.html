@@ -1,0 +1,25 @@
+{% extends 'main_tpl.html' %}
+{% block content %}
+{% load widget_tweaks %}
+{% load teacher_extras %}
+  <h2>Decipline {% if access.parent_id.discipline_id  %}  {{ access.parent_id.discipline_id }} topic {% endif %}
+      {{ access }}</h2>
+ <h1>ReportCard({{ access.quiestion_quantity }} Questions in test )
+     {% if final_quize_status == True %} Final {% else %} Trainy  {% endif %} quize</h1>
+    <h2>{% if final_quize_status == True %}
+        from {{ access.final_quize_start }} to {{ access.final_quize_end }}
+        {% else %}
+        from {{ access.test_quize_start }} to {{ access.test_quize_end }}
+        {% endif %}
+    </h2>
+    <h2>{{ rezult.user }} estimation {{ rezult.get_estimation }} correct answers {{ rezult.get_correct_answers }}
+    correct answers percent {{ rezult.get_correct_answers_percent }}</h2>
+    {% for instance in log %}
+        <p>creation_date {{ instance.creation_date }} question_id {{ instance.question_id }}
+            answer_right {{ instance.answer_right }}
+        {% if instance.image %}
+        <p>{{ instance.image.url }}</p>
+        {% endif %}
+        </p>
+    {% endfor %}
+{% endblock %}

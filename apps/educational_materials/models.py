@@ -203,7 +203,7 @@ class DisciplineAccess(ParentAccess):
         if errors:
             raise ValidationError(errors)
 
-    def get_absolute_url(self):
+    def get_rezult_url(self):
         return reverse('students_urls:decepline_quize_rezult_url', kwargs={'pk': self.get_object().pk})
 
     def get_testing_url(self):

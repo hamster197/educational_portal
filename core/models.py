@@ -75,6 +75,26 @@ class Student(MainUser):
         verbose_name = 'Студент'
         verbose_name_plural = 'Все студенты'
 
+    # def get_decepline_queryset(self, access):
+    #     from apps.students.models import QuizeRezultDecepline
+    #     return QuizeRezultDecepline.objects.filter(parent_id=access, user_id=self.pk)
+    #
+    # def get_topic_queryset(self, access):
+    #     from apps.students.models import QuizeRezultTopic
+    #     return QuizeRezultTopic.objects.filter(parent_id=access, user_id=self.pk)
+    #
+    # def get_quize_estimation(self, access, type):
+    #     estimation = 'N/A'
+    #     from apps.educational_materials.models import DisciplineAccess, TopicAccess
+    #     if type == DisciplineAccess:
+    #         rezult = self.get_decepline_queryset(access)
+    #     elif type == TopicAccess:
+    #         rezult = self.get_topic_queryset(access)
+    #     if rezult.exists():
+    #         estimation = str(rezult.first().get_estimation()) + ' ' + str(rezult.first().get_correct_answers_percent())\
+    #                         + '% ' +str(rezult.first().get_correct_answers()) + ' Correct Answers'
+    #     return estimation
+
 
 class Teacher(MainUser):
     deaprtment_id = models.ForeignKey(DepartmentQuide, related_name='teacher_deaprtment_id', on_delete=models.CASCADE,
