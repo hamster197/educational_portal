@@ -66,6 +66,7 @@ class StudentViewSet(DepartmentQuideViewSet):
     serializer_class = StudentSerializer
     filterset_class = StudentFilter
 
+
 class TeacherViewSet(DepartmentQuideViewSet):
     """
         Перечисляет и редактирует студентов.

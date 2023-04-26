@@ -48,10 +48,6 @@ class QuizeRezultObject(models.Model):
 
         return estimation
 
-    def __str__(self):
-        print('1')
-        return self.user
-
 class QuizeRezultDecepline(QuizeRezultObject):
     parent_id = models.ForeignKey(DisciplineAccess, verbose_name='Дисциплинa:', on_delete=models.CASCADE,
                                   related_name='quize_declpline_rezult_discipline_id', )

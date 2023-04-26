@@ -39,7 +39,7 @@ class StudentRegisterPage(CreateView):
     form_class = StudentCreateForm
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated or SystemQuide.objects.get(pk=1).front_registration == False:
+        if request.user.is_authenticated or SystemQuide.objects.get(pk=1).front_registration==False:
             return redirect('main')
         return super().dispatch(request, *args, **kwargs)
 

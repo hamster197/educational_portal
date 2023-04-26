@@ -9,7 +9,7 @@ from core.core import get_user_from_request
 @receiver(pre_delete, sender=QuizeRezultDecepline)
 @receiver(pre_delete, sender=QuizeRezultTopic)
 def retake_quize(sender, instance, **kwargs, ):
-    ## async send mail?
+
     if sender == QuizeRezultDecepline:
         logs_to_delete = QuizeLogDeciplineJournal
         journal = QuizeLogRetakeDeciplineJournal
@@ -23,3 +23,7 @@ def retake_quize(sender, instance, **kwargs, ):
     journal.objects.create(student_id=instance.user.pk, student_full_name=student_full_name,
                            user_id=str(get_user_from_request().pk), user_full_name=user_full_name,
                            parent_id=instance.pk, )
+
+    import asyncio
+    from core.core import asyncio_send_mail
+    asyncio.run(asyncio_send_mail('you have gained access to the retake ' + str(instance.parent_id), instance.user.email))

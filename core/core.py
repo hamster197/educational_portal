@@ -47,3 +47,26 @@ def students_import_from_csv(csv_file):
     result_string += str(updated_users) + ' обновлено студентов.'
 
     return result_string
+
+
+async def asyncio_send_mail(message_text, email):
+    from email.message import EmailMessage
+    import aiosmtplib
+    message = EmailMessage()
+    message["From"] = "hamstertest197@yandex.ru"
+    message["To"] = email
+    message["Subject"] = "portal message"
+    message.set_content(message_text)
+    from app.settings import EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+    try:
+        await aiosmtplib.send(
+            message,
+            hostname=EMAIL_HOST,
+            username=EMAIL_HOST_USER,
+            password=EMAIL_HOST_PASSWORD
+        )
+    except aiosmtplib.errors.SMTPException:
+        print(1)
+        pass
+
+

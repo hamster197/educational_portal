@@ -16,7 +16,7 @@ apps/portal/__pycache__
 apps/portal/api/__pycache__
 apps/teachers/migrations
 apps/teachers/__pycache__
-apps/teachers/templatetags/__pycache__/
+apps/teachers/templatetags/__pycache__
 apps/teachers/api/__pycache__
 apps/students/migrations
 apps/students/__pycache__
