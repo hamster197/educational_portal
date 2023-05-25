@@ -24,5 +24,5 @@ urlpatterns = [
          name='decepline_quize_test_url'),
     path('topic/quize/test/<int:pk>/', QuizeTest.as_view(model=TopicAccess), name='topic_quize_test_url'),
 
-    #path('api/v1/', include('apps.teachers.api.urls'),)
+    path('api/v1/', include('apps.students.api.urls', ), )
 ]

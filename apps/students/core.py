@@ -2,16 +2,32 @@ import datetime
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
 
 from apps.educational_materials.models import DisciplineAccess, TopicAccess, Question
 from apps.journals.models import QuizeLogDeciplineJournal, QuizeLogTopicJournal
 from apps.students.models import QuizeRezultDecepline, QuizeRezultTopic
 from core.models import Student
 
+def get_student_group(self):
+    return get_object_or_404(Student, pk=self.request.user.pk).active_group_id
+
+
+def get_student_aviable_materials(self, instance):
+    return instance.objects.filter(group_id=get_student_group(self),
+                                           discipline_access_end__gte=timezone.now(),
+                                           discipline_access_start__lte=timezone.now(),
+                                           parent_id__status=True, )
+
+def get_student_unaviable_diciplines(self):
+    return DisciplineAccess.objects.filter(group_id=get_student_group(self),
+                                           discipline_access_end__lte=timezone.now(),
+                                           parent_id__status=True, )
 
 def get_for_aviable_quize_access(self, ):
 
-    request_group = get_object_or_404(Student, pk=self.request.user.pk).active_group_id
+    request_group = get_student_group(self)
     queryset = self.model.objects.filter(Q(test_quize_start__lte=self.now, test_quize_end__gte=self.now)
                                          |Q(final_quize_start__lte=self.now, final_quize_end__gte=self.now),
                                          parent_id__status=True, group_id=request_group, )

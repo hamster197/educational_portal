@@ -38,7 +38,7 @@ class Discipline(MatherialObject):
         return Question.objects.filter(topic_access__discipline_id=self).count()
 
     def get_themes(self):
-        return Topic.objects.filter(discipline_id=self).count()
+        return Topic.objects.filter(discipline_id=self, status=True).count()
 
     def get_themes_access(self):
         from core.core import get_user_from_request
@@ -139,8 +139,7 @@ class ParentAccess(models.Model):
             instance_model = QuizeRezultDecepline
         if self._meta.model_name == 'topicaccess':
             instance_model = QuizeRezultTopic
-        quize_rezult = instance_model.objects.filter(parent_id=self, user=get_user_from_request(),
-                                                    ended_quize=True)
+        quize_rezult = instance_model.objects.filter(parent_id=self, user=get_user_from_request(), ended_quize=True)
         if quize_rezult.filter(final_quize=True,).exists():
             return 'Итоговый тест сдан с оценкой ' + str(quize_rezult.first().get_estimation())
         elif quize_rezult.filter(final_quize=False,).exists() and self.final_quize_start > timezone.now():
@@ -269,7 +268,7 @@ class TopicAccess(ParentAccess):
         return reverse('students_urls:topic_quize_test_url', kwargs={'pk': self.get_object().pk})
 
 class Question(models.Model):
-    topic_access = models.ManyToManyField(Topic, related_name='question_topic_access_id', verbose_name='Доступ к теме:',)#question_topic_access_id
+    topic_access = models.ManyToManyField(Topic, related_name='question_topic_access_id', verbose_name='Доступ к теме:',)
     question_text = RichTextUploadingField(verbose_name='Текст вопроса:', max_length=5000, blank=False)
     image = models.ImageField(verbose_name='Фото:', upload_to='image/quize/', blank=True)
     variants_type_choises = (('Тест один правильный ответ', 'Тест один правильный ответ'),

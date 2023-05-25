@@ -11,7 +11,8 @@ from django.utils import timezone
 
 from apps.journals.models import QuizeLogTopicJournal, QuizeLogDeciplineJournal
 from apps.students.core import check_for_aviable_quize_rezult, get_for_aviable_quize_access, \
-    get_or_create_for_aviable_quize_rezult, get_timer, get_aviable_questions
+    get_or_create_for_aviable_quize_rezult, get_timer, get_aviable_questions, get_student_aviable_materials, \
+    get_student_unaviable_diciplines
 from apps.students.forms import *
 from core.decorators import students_check
 from core.models import Student, StudentGroupQuide
@@ -24,14 +25,9 @@ class PersonalAccount(object):
 
     def get_context_data(self, **kwargs):
         context = super(PersonalAccount, self).get_context_data(**kwargs,)
-        group_id = get_object_or_404(Student, username=self.request.user.username).active_group_id
-        context['discipline_aviable'] = DisciplineAccess.objects.filter(group_id=group_id,
-                                                                        discipline_access_end__gte=timezone.now(),
-                                                                        discipline_access_start__lte=timezone.now(),
-                                                                        parent_id__status=True)
-        context['discipline_unaviable'] = DisciplineAccess.objects.filter(group_id=group_id,
-                                                                          discipline_access_end__lte=timezone.now(),
-                                                                          parent_id__status=True)
+        context['discipline_aviable'] =  get_student_aviable_materials(self, DisciplineAccess)
+        context['discipline_unaviable'] = get_student_unaviable_diciplines(self)
+
         return context
 
 @method_decorator(students_decorators, name='dispatch')
@@ -102,11 +98,7 @@ class DiscipineDetail(DetailView):
     context_object_name = 'instance'
 
     def get_queryset(self):
-        group_id = get_object_or_404(Student, username=self.request.user.username).active_group_id
-        quesryset = DisciplineAccess.objects.filter(group_id=group_id, parent_id__status=True,
-                                                    discipline_access_start__lte=timezone.now())
-
-        return quesryset
+        return get_student_aviable_materials(self, DisciplineAccess)
 
 @method_decorator(students_decorators, name='dispatch')
 class TopicDetail(DiscipineDetail):
@@ -152,8 +144,8 @@ class QuizeApproval(QuizeObject):
                                                                        parent_id__discipline_id__status=True,)
 
     def post(self, request, *args, **kwargs):
-
         get_or_create_for_aviable_quize_rezult(self)
+
         if self.model == DisciplineAccess:
             return redirect('students_urls:decepline_quize_test_url', pk=self.get_object().pk)
         elif self.model == TopicAccess:

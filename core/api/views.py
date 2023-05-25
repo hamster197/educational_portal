@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
+from apps.teachers.api.permissions import IsTeacher
 from core.api.filters import *
 from core.api.serializers import *
 from core.core import students_import_from_csv
@@ -32,9 +33,15 @@ class FacultyViewSet(ModelViewSet):
     """
     queryset = FacultyQuide.objects.all().order_by('id')
     serializer_class = FacultyQuideSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = [IsAdminUser|IsTeacher,]
     pagination_class = CorePagination
     filterset_class = FacultyFilter
+
+    def _allowed_methods(self):
+        if Teacher.objects.filter(pk=self.request.user.pk).exists():
+            self.http_method_names = ['get']
+
+        return [m.upper() for m in self.http_method_names if hasattr(self, m)]
 
 class DepartmentQuideViewSet(FacultyViewSet):
     """

@@ -37,27 +37,28 @@ answer_compliance_fc.register('answer_compliance_fc', AnswerFirstColumnComplianc
 answer_compliance_sc = routers.SimpleRouter()
 answer_compliance_sc.register('answer_compliance_sc', AnswerSecondColumnComplianceViewSet, basename='answer_compliance_sc_api_urls')
 
-app_name = 'teachers_api_urls'
-
 urlpatterns = [
+    path('disciplines/', DecipisnesTeacher.as_view()),
     path('discipline/<int:discipline_id>/', include(router_topic.urls,)),
     path('discipline_access/<int:discipline_id>/', include(router_discipline_access.urls,)),
 
-    path('topic/<int:topic_id>/', include(router_question.urls, )),
+    path('topic/<int:discipline_id>/', include(router_topic.urls,)),
     path('topic_video/<int:topic_id>/', include(router_topic_video.urls, )),
     path('topic_material/<int:topic_id>/', include(router_topic_material.urls, )),
     path('topic_access/<int:topic_id>/', include(router_topic_access.urls,)),
 
-    path('<int:topic_id>/questions/copy/', QuestionCopy.as_view(), name='question_copy_api_url'),
+    path('<int:topic_id>/questions/copy/', QuestionCopy.as_view(), name='questions_copy'),
 
+    path('topic/<int:topic_id>/questions/', include(router_question.urls, )),
     path('topic/<int:topic_id>/question/<int:question_id>/', include(router_answer.urls,)),
+    # path('question/<int:question_id>/', include(router_answer.urls, )),
+
     path('topic/<int:topic_id>/question_sequence/<int:question_id>/', include(router_answer_sequence.urls,)),
 
-    path('topic/<int:topic_id>/answer_compliance_fc/<int:question_id>/', include(answer_compliance_fc.urls,)),
-    path('topic/<int:topic_id>/answer_compliance_sc/<int:question_id>/', include(answer_compliance_sc.urls,)),
+    path('topic/<int:topic_id>/answer/<int:question_id>/', include(answer_compliance_fc.urls,)),
+    path('topic/<int:topic_id>/answer/<int:question_id>/', include(answer_compliance_sc.urls,)),
 
-    path('topic/<int:topic_id>/questions/<int:question_id>/answer_compliance/new/', AnswerComplianceNew.as_view(),
-         name='answer_compliance_new_api_url'),
+    path('topic/<int:topic_id>/questions/<int:question_id>/answer_compliance/new/', AnswerComplianceNew.as_view(),),
 ]
 
 urlpatterns += router.urls

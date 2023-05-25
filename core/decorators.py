@@ -5,7 +5,7 @@ from core.models import Teacher, Student
 from functools import wraps
 from django.core.exceptions import PermissionDenied
 
-def teachers_check(user, ):
+def teachers_check(user,):
     if user.groups.all().exists():
         return Teacher.objects.filter(pk=user.pk).exists()
 

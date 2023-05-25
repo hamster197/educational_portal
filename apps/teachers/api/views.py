@@ -3,36 +3,63 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.reverse import reverse
+from rest_framework.response import Response
 
 from apps.educational_materials.models import Discipline, Topic, DisciplineAccess, TopicAccess, Question, TopicVideo, \
     TopicMaterial, Answer
 from apps.portal.api.views import BlogViewSetPagination
-from apps.teachers.api.mixins import IsTeacher
+from apps.teachers.api.permissions import IsTeacher
 from apps.teachers.api.serializers import DisciplineSerializer, TopicSerializer, MainDisciplineAccessSerialser, \
     TopicAccessSerializer, QuestionSerializer, TopicVideoSerializer, TopicMaterialSerializer, QuestionCopySerializer, \
     AnswerEditSerializer, AnswerSequenceEditSerializer, AnswerSecondColumnComplianceSerializer, \
-    AnswerComplianceSerializer
+    AnswerComplianceSerializer, TeacherDisciplinesListSerializer
 from apps.teachers.core import questions_copy_core
 from apps.teachers.filters import QuestionFilter
 from core.models import Teacher
 
+class DecipisnesTeacher(APIView):
+    """
+            view published and not published education diceplines counts
+            permissions:
+            IsTeacher,
+    """
+    permission_classes = (IsTeacher, )
+
+    def get(self, request):
+        all_disciplines = Discipline.objects.filter(department_id=get_object_or_404(Teacher,
+                                                                  username=self.request.user.username).deaprtment_id)
+
+        return Response({
+            "published_disciplines " + str(all_disciplines.filter(status=True).count()):
+                reverse('teacher_urls:discipline_published_api_urls-list', request=request, ),
+            "unpublished_disciplines " + str(all_disciplines.filter(status=False).count()):
+                reverse('teacher_urls:discipline_unpublished_api_urls-list', request=request, ), })
 
 class AllMethodsMixin(object):
     permission_classes = (IsTeacher,)
     pagination_class = BlogViewSetPagination
+
 class MethodsMixin(object):
+    permission_classes = (IsTeacher,)
     http_method_names = ['get', 'post', 'put', 'patch', 'head', 'options', 'trace']
 
 
 class DisciplineViewSet(MethodsMixin):
-    serializer_class = DisciplineSerializer
 
-    def get_serializer_context(self):
-        context = super(DisciplineViewSet, self).get_serializer_context()
-        self_queryset = Discipline.objects.filter(department_id=get_object_or_404(Teacher,
-                                                                   username=self.request.user.username).deaprtment_id)
-        context.update({'self_queryset': self_queryset})
-        return context
+
+    def get_queryset(self):
+        return Discipline.objects.filter(department_id=get_object_or_404(Teacher,
+                                                                  username=self.request.user.username).deaprtment_id)
+
+
+    def get_serializer_class(self):
+        if self.kwargs:
+            self.serializer_class = DisciplineSerializer
+        else:
+            self.serializer_class = TeacherDisciplinesListSerializer
+
+        return self.serializer_class
 
 class DisciplinePublishedViewSet(DisciplineViewSet, ModelViewSet):
     """
@@ -40,9 +67,15 @@ class DisciplinePublishedViewSet(DisciplineViewSet, ModelViewSet):
             permissions:
             IsTeacher
     """
-    def get_queryset(self):
-        queryset = self.get_serializer_context().get('self_queryset').filter(status=True, )
-        return queryset
+
+    def filter_queryset(self, queryset):
+        return self.get_queryset().filter(status=True,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['published'] = True
+
+        return context
 
 class DisciplineUnPublishedViewSet(DisciplineViewSet, ModelViewSet):
     """
@@ -50,9 +83,10 @@ class DisciplineUnPublishedViewSet(DisciplineViewSet, ModelViewSet):
             permissions:
             IsTeacher
     """
-    def get_queryset(self):
-        queryset = self.get_serializer_context().get('self_queryset').filter(status=False,)
-        return queryset
+
+    def filter_queryset(self, queryset):
+        return self.get_queryset().filter(status=False,)
+
 
 class DisciplineAccessViewSet(MethodsMixin, ModelViewSet):
     """
@@ -65,12 +99,14 @@ class DisciplineAccessViewSet(MethodsMixin, ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["discipline_id"] = self.kwargs['discipline_id']
+        context["self_group"] = self.get_object().group_id
+
         return context
 
     def get_queryset(self):
         department_id = get_object_or_404(Teacher, username=self.request.user.username).deaprtment_id
-        queryset = DisciplineAccess.objects.filter(parent_id__department_id=department_id,
-                                                   parent_id__id=self.kwargs['discipline_id'])
+        queryset = DisciplineAccess.objects.filter(parent_id__department_id=department_id,)
+                                                   #parent_id__id=self.kwargs['discipline_id'])
         return queryset
 
     def perform_create(self, serializer):
@@ -91,6 +127,7 @@ class DisciplineAccessViewSet(MethodsMixin, ModelViewSet):
             serializer.save(data=self.request.data)
         except:
             raise ValidationError('Valudation error.')
+
 class TopicViewSet(MethodsMixin, ModelViewSet):
     """
             Перечисляет и создает, редактирует Темы.
@@ -140,7 +177,7 @@ class TopicVideoViewSet(AllMethodsMixin, ModelViewSet):
         else:
             raise PermissionDenied({"message": "You don't have permission to access",})
 
-class TopicMaterialViewSet(TopicVideoViewSet):#AllMethodsMixin, ModelViewSet
+class TopicMaterialViewSet(TopicVideoViewSet):
     """
             Перечисляет и создает, редактирует Видео в Темах.
             permissions:
@@ -167,6 +204,8 @@ class TopicAccessViewSet(MethodsMixin, ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["topic_id"] = self.kwargs['topic_id']
+        if 'pk' in self.kwargs:
+            context["self_group"] = self.get_object().group_id
         return context
 
     def get_queryset(self,):
@@ -205,6 +244,7 @@ class QuestionViewSet(MethodsMixin, ModelViewSet):
     """
     serializer_class = QuestionSerializer
     filterset_class = QuestionFilter
+    pagination_class = BlogViewSetPagination
 
     def get_queryset(self,):
         if getattr(self, "swagger_fake_view", False):
@@ -212,7 +252,13 @@ class QuestionViewSet(MethodsMixin, ModelViewSet):
         department_id = get_object_or_404(Teacher, username=self.request.user.username).deaprtment_id
         queryset = Question.objects.filter(topic_access=self.kwargs['topic_id'],
                                            topic_access__discipline_id__department_id=department_id,)
+
         return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["topic_id"] = self.kwargs['topic_id']
+        return context
 
     def perform_create(self, serializer):
         if not Topic.objects.filter(id=self.kwargs['topic_id']).exists():
@@ -269,10 +315,15 @@ class AnswerObjectMixin(AllMethodsMixin, ModelViewSet):
 
     def get_queryset(self,):
 
-        queryset = Answer.objects.filter(question_id__topic_access__id=self.kwargs['topic_id'],#question_id__topic_access=topic,
+        queryset = Answer.objects.filter(question_id__topic_access__id=self.kwargs['topic_id'],
                                          question_id=self.kwargs['question_id'], question_id__variants_type__in=self.question_type)
 
         return queryset.order_by('-pk')
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["topic_id"] = self.kwargs['topic_id']
+        return context
 
 class AnswerViewSet(AnswerObjectMixin):
 
@@ -313,6 +364,7 @@ class AnswerSequenceViewSet(AnswerObjectMixin):
         except:
             raise ValidationError('Valudation error', )
 
+
 class AnswerFirstColumnComplianceViewSet(AnswerObjectMixin):
     """
             редактирует, удаляет и добавляет тексты ответов к вопросам.
@@ -346,6 +398,7 @@ class AnswerSecondColumnComplianceViewSet(AnswerFirstColumnComplianceViewSet):
         Answer.objects.filter(Q(first_columnn=instance.second_column) | Q(second_column=instance.second_column),
                               question_id__id=self.kwargs['question_id'],).delete()
 
+
 class AnswerComplianceNew(AllMethodsMixin, APIView):
     """
              копирует вопросы в тему.
@@ -374,6 +427,8 @@ class AnswerComplianceNew(AllMethodsMixin, APIView):
             error = str(serializer.errors)
         from rest_framework.response import Response
         return Response(action + error)
+
+
 
 
 

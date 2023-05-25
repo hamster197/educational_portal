@@ -44,5 +44,5 @@ class BlogGaleryViewSet(ModelViewSet):
             request.user.is_staff
     """
     queryset = BlogGalery.objects.all()#.order_by('id')
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, )
     serializer_class = BlogGalerySerializer

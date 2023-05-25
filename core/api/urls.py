@@ -12,13 +12,11 @@ router.register('groups_api_urls', StudentGroupQuideViewSet, basename='groups_ap
 router.register('students_api_urls', StudentViewSet, basename='students_api_urls')
 router.register('teacher_api_urls', TeacherViewSet, basename='teacher_api_urls')
 
-app_name = 'core_api_urls'
-
 urlpatterns = [
     path('auth/', include('djoser.urls')),
     re_path('auth/', include('djoser.urls.authtoken')),
 
-    path('students_csv_import/', StudentsCsvImport.as_view(), name='students_csv_import_url')
+    path('students_csv_import/', StudentsCsvImport.as_view(), )
 ]
 
 urlpatterns += router.urls
