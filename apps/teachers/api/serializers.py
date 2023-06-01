@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import ChoiceField, CharField
+from rest_framework.fields import ChoiceField, CharField, SerializerMethodField
 from rest_framework.relations import HyperlinkedIdentityField
 from rest_framework.serializers import ModelSerializer, Serializer
 
@@ -7,7 +7,7 @@ from apps.educational_materials.models import Discipline, DisciplineAccess, Topi
     TopicAccess, Question, Answer
 from core.api.core import ParameterisedHyperlinkedIdentityField
 from core.api.serializers import StudentGroupQuideSerializer, DepartmentQuideSerializer
-from core.models import Teacher, StudentGroupQuide
+from core.models import Teacher, StudentGroupQuide, Student
 
 
 class DisciplineTopicSerializer(ModelSerializer):
@@ -32,16 +32,26 @@ class MainDisciplineAccessSerialser(ModelSerializer):
         self.fields['group_id'].queryset = StudentGroupQuide.objects.all().\
             exclude(name__in=groups.exclude(group_id=self.context.get('self_group')))
 
+class DisciplineAccessHyperLinkedIdentityField(HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        if obj.group_id.pk is None:
+            return None
+
+        return self.reverse(view_name, kwargs={
+            'group_id': obj.group_id.pk, 'instance_id': obj.pk,
+        }, format=format, request=request)
+
 class DisciplineAccessSerialser(ModelSerializer):
     group_id = StudentGroupQuideSerializer()
     access_url = ParameterisedHyperlinkedIdentityField(view_name='teacher_urls:discipline_access_api_urls-detail',
                                         lookup_fields=(('pk', 'pk'), ('parent_id.pk', 'discipline_id')), read_only=True)
-
+    rezult_url = DisciplineAccessHyperLinkedIdentityField(view_name='teacher_urls:report_card_decepline')
 
     class Meta:
         model = DisciplineAccess
         fields = ['pk', 'group_id', 'quiestion_quantity', 'time', 'discipline_access_start', 'discipline_access_end',
-                  'test_quize_start', 'test_quize_end', 'final_quize_start', 'final_quize_end', 'access_url']
+                  'test_quize_start', 'test_quize_end', 'final_quize_start', 'final_quize_end', 'access_url', 'rezult_url',]
 
 
 class DisciplineSerializer(ModelSerializer):
@@ -68,7 +78,7 @@ class TeacherDisciplinesListSerializer(ModelSerializer):
         fields = ['pk',  'creation_date', 'title', 'get_quiz_questions', 'get_themes', 'discipline_access_parent_id',
                   'url']
 
-    def get_extra_kwargs(self):#if 'published' in self.context:
+    def get_extra_kwargs(self):
         if 'published' in self.context:
             extra_kwargs = {
                 'url': {'view_name': 'teacher_urls:discipline_published_api_urls-detail', 'lookup_field': 'pk'},
@@ -89,21 +99,34 @@ class TopicDisciplineSerializer(ModelSerializer):
         }
 
 class TopicVideoSerializer(ModelSerializer):
+
     class Meta:
         model = TopicVideo
         fields = '__all__'
         read_only_fields = ['topic_id']
 
 class TopicMaterialSerializer(ModelSerializer):
+
     class Meta:
         model = TopicMaterial
         fields = '__all__'
         read_only_fields = ['topic_id']
 
+class TopicAccessHyperLinkedIdentityField(HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        if obj.group_id.pk is None:
+            return None
+
+        return self.reverse(view_name, kwargs={
+            'group_id': obj.group_id.pk, 'instance_id': obj.pk,
+        }, format=format, request=request)
+
 class TopicAccessSerializer(ModelSerializer):
     access_url = ParameterisedHyperlinkedIdentityField(view_name='teacher_urls:topic_access_api_urls-detail',
                                                        lookup_fields=(('pk', 'pk'), ('parent_id.pk', 'topic_id')),
                                                        read_only=True)
+    rezult_url = TopicAccessHyperLinkedIdentityField(view_name='teacher_urls:report_card_topic')
 
     class Meta:
         model = TopicAccess
@@ -139,6 +162,7 @@ class TopicSerializer(ModelSerializer):
                   'questions_url', 'topic_video_topic_id', 'topic_material_topic_id', 'topic_access_parent_id',]
 
 class AnswerHyperLinkedIdentityField(HyperlinkedIdentityField):
+
     def get_url(self, obj, view_name, request, format):
         if hasattr(obj, 'pk') and obj.pk is None:
             return None
@@ -171,8 +195,8 @@ class AnswerSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['topic_access', ]
 
-
 class QuestionHyperLinkedIdentityField(HyperlinkedIdentityField):
+
     def get_url(self, obj, view_name, request, format):
         if hasattr(obj, 'pk') and obj.pk is None:
             return None
@@ -241,3 +265,40 @@ class AnswerSecondColumnComplianceSerializer(AnswerSequenceEditSerializer):
 class AnswerComplianceSerializer(Serializer):
     question = CharField(label='Question', required=True)
     answer = CharField(label='Answer', required=True)
+
+class ReportCardHyperLinkedIdentityField(HyperlinkedIdentityField):
+    def get_url(self, obj, view_name, request, format):
+        rezult = self.context['all_users_rezults'].filter(user__pk=obj.pk).first()
+
+        if not rezult:
+            return None
+
+        if self.context['instance'] == TopicAccess:
+            view_name = 'teacher_urls:report_topic_detail'
+        return self.reverse(view_name, kwargs={
+            'pk': rezult.pk,
+        }, format=format, request=request)
+
+class ReportCardSerializer(ModelSerializer):
+    rezult_string = SerializerMethodField()
+    rezult_detail_url = ReportCardHyperLinkedIdentityField(view_name='teacher_urls:report_decepline_detail',)
+
+    class Meta:
+        model = Student
+        fields = ['pk', 'first_name', 'last_name', 'patronymic', 'rezult_string', 'rezult_detail_url', ]
+
+    def get_rezult_string(self, obj):
+        rezult = self.context['all_users_rezults'].filter(user__pk=obj.pk).first()
+        rezult_string = 'N/A'
+        if rezult:
+            rezult_string = 'testing was started at ' + str(rezult.quize_started_it) +' estimation ' + str(rezult.get_estimation())
+            rezult_string = rezult_string + ' correct answers ' + str(rezult.get_correct_answers())
+            rezult_string = rezult_string + ' percent ' + str(rezult.get_correct_answers_percent())
+
+        return rezult_string
+
+class ReportCardDetailSerializer(ModelSerializer):
+
+    class Meta:
+        model = None
+        fields = '__all__'

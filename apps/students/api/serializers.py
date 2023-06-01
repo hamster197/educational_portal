@@ -74,11 +74,13 @@ class DisciplineSerializer(ModelSerializer):
 
 
 class StudentTopicVideoSerializer(ModelSerializer):
+
     class Meta:
         model = TopicVideo
         exclude = ['topic_id']
 
 class StudentTopicMaterialSerializer(ModelSerializer):
+
     class Meta:
         model = TopicMaterial
         exclude = ['topic_id']

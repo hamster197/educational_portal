@@ -504,6 +504,7 @@ class ReportCard(DetailView):
     context_object_name = 'access'
     quize_type = ''
     action = 'List'
+
     def get_queryset(self):
         return get_report_card_queryset(self)
 
@@ -514,9 +515,8 @@ class ReportCard(DetailView):
         context['all_users_rezults'] = self.quize_type.objects.filter(parent_id=self.object, ended_quize=True,
                                                                       final_quize=context['final_quize_status'])
         all_users_rezults_subquery = context['all_users_rezults'].filter(user=OuterRef("pk"),)
-
         if self.object.group_id:
-            user_rezults = Student.objects.filter(active_group_id=self.object.group_id, ) \
+            user_rezults = Student.objects.filter(active_group_id=self.object.group_id, is_active=True) \
                 .annotate(user_rezult_pk=Subquery(all_users_rezults_subquery.values('pk')),
                           quize_started_it=Subquery(all_users_rezults_subquery.values('quize_started_it')))
             context['report_cart'] = user_rezults

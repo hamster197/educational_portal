@@ -1,5 +1,6 @@
 from rest_framework import routers
 from django.urls import path, include
+
 from apps.teachers.api.views import *
 
 router = routers.SimpleRouter()
@@ -59,6 +60,17 @@ urlpatterns = [
     path('topic/<int:topic_id>/answer/<int:question_id>/', include(answer_compliance_sc.urls,)),
 
     path('topic/<int:topic_id>/questions/<int:question_id>/answer_compliance/new/', AnswerComplianceNew.as_view(),),
+
+    path('report_card_decepline/<int:instance_id>/group/<int:group_id>/', ReportCard.as_view(instance=DisciplineAccess,
+                                                     quize_type=QuizeRezultDecepline), name='report_card_decepline'),
+    path('report_card_topic/<int:instance_id>/group/<int:group_id>/', ReportCard.as_view(instance=TopicAccess,
+                                                         quize_type=QuizeRezultTopic), name='report_card_topic'),
+
+    path('report_detail_decepline/<int:pk>/', ReportCardDetail.as_view(quize_type=QuizeRezultDecepline),
+         name='report_decepline_detail'),
+    path('report_detail_topic/<int:pk>/', ReportCardDetail.as_view(quize_type=QuizeRezultTopic),
+         name='report_topic_detail'),
+
 ]
 
 urlpatterns += router.urls

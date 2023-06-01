@@ -14,8 +14,8 @@ from core.models import StudentGroupQuide, Teacher, Student
 
 class MatherialObject(models.Model):
     creation_date = models.DateTimeField(verbose_name='Дата создания:', auto_now=True, )
-    title = models.CharField(verbose_name='Название темы:', max_length=255, blank=False, unique=True)
-    description = RichTextUploadingField(verbose_name='Текст темы', blank=True, )
+    title = models.CharField(verbose_name='Название:', max_length=255, blank=False, unique=True)
+    description = RichTextUploadingField(verbose_name='Текст', blank=True, )
     status = models.BooleanField(verbose_name='Опубликован?', default=False, )
 
     class Meta:

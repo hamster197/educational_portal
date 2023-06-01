@@ -5,7 +5,6 @@ from apps.journals.models import QuizeLogDeciplineJournal, QuizeLogTopicJournal
 from core.models import Student
 
 
-# Create your models here.
 
 class QuizeRezultObject(models.Model):
     user = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE, )
@@ -13,7 +12,6 @@ class QuizeRezultObject(models.Model):
     final_quize = models.BooleanField('Итоговый тест?', default=False)
     ended_quize = models.BooleanField('Тест сдавался?', default=False)
     quize_started_it = models.DateTimeField('Дата начала сдачи теста(seconds)', null=True, )
-
 
     class Meta:
         abstract = True
