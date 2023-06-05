@@ -1,6 +1,7 @@
 from rest_framework import routers
 from django.urls import path, include
 
+from apps.journals.models import QuizeLogRetakeDeciplineJournal, QuizeLogDeciplineJournal
 from apps.teachers.api.views import *
 
 router = routers.SimpleRouter()
@@ -69,6 +70,11 @@ urlpatterns = [
     path('report_detail_decepline/<int:pk>/', ReportCardDetail.as_view(quize_type=QuizeRezultDecepline),
          name='report_decepline_detail'),
     path('report_detail_topic/<int:pk>/', ReportCardDetail.as_view(quize_type=QuizeRezultTopic),
+         name='report_topic_detail'),
+
+    path('report_detail_decepline_log/<int:instance_id>/<int:pk>/', ReportCardLog.as_view(quize_type=QuizeRezultDecepline),
+         name='report_decepline_log_detail'),
+    path('report_detail_topic_log/<int:instance_id>/<int:pk>/', ReportCardDetail.as_view(quize_type=QuizeRezultTopic),
          name='report_topic_detail'),
 
 ]

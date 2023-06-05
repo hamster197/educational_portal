@@ -9,14 +9,16 @@ from rest_framework.response import Response
 
 from apps.educational_materials.models import Discipline, Topic, DisciplineAccess, TopicAccess, Question, TopicVideo, \
     TopicMaterial, Answer
+from apps.journals.models import QuizeLogTopicJournal, QuizeLogDeciplineJournal
 from apps.portal.api.views import BlogViewSetPagination
 from apps.students.models import QuizeRezultDecepline, QuizeRezultTopic
 from apps.teachers.api.permissions import IsTeacher
 from apps.teachers.api.serializers import DisciplineSerializer, TopicSerializer, MainDisciplineAccessSerialser, \
     TopicAccessSerializer, QuestionSerializer, TopicVideoSerializer, TopicMaterialSerializer, QuestionCopySerializer, \
     AnswerEditSerializer, AnswerSequenceEditSerializer, AnswerSecondColumnComplianceSerializer, \
-    AnswerComplianceSerializer, TeacherDisciplinesListSerializer, ReportCardSerializer, ReportCardDetailSerializer
-from apps.teachers.core import questions_copy_core, get_report_card_queryset, get_final_quize_status
+    AnswerComplianceSerializer, TeacherDisciplinesListSerializer, ReportCardSerializer, ReportCardDetailSerializer, \
+    AllFieldsSerializer
+from apps.teachers.core import questions_copy_core, get_final_quize_status
 from apps.teachers.filters import QuestionFilter
 from core.models import Teacher, Student
 
@@ -476,11 +478,6 @@ class ReportCardDetail(RetrieveDestroyAPIView):
     permission_classes = (IsTeacher, )
     quize_type = None
 
-
-    def get_serializer_class(self):
-        ReportCardDetailSerializer.Meta.model = self.quize_type
-        return ReportCardDetailSerializer
-
     def get_queryset(self):
         department_id = Teacher.objects.get(pk=self.request.user.pk).deaprtment_id
         if self.quize_type == QuizeRezultDecepline:
@@ -489,7 +486,49 @@ class ReportCardDetail(RetrieveDestroyAPIView):
             queryset = self.quize_type.objects.filter(parent_id__parent_id__discipline_id__department_id=department_id)
         return queryset
 
+    def get_serializer_class(self):
+        ReportCardDetailSerializer.Meta.model = self.quize_type
 
+        return ReportCardDetailSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['instance'] = self.quize_type
+        return context
+
+class ReportCardLog(AllMethodsMixin, ListAPIView):
+    """
+            Reports cart Log view.
+            instance_id pk of instance(Discipline or Topic Quize Rezult)
+            pk pk of user pk
+            permissions:
+            IsTeacher
+    """
+    quize_type = None
+
+    def get(self, request, *args, **kwargs):
+        if self.quize_type == QuizeRezultDecepline:
+            self.model = QuizeLogDeciplineJournal
+        elif self.quize_type == QuizeRezultTopic:
+            self.model = QuizeLogTopicJournal
+
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        department_id = Teacher.objects.get(pk=self.request.user.pk).deaprtment_id
+        if (self.quize_type == QuizeRezultDecepline and not self.quize_type.objects.filter(parent_id__parent_id__department_id=department_id)) \
+            or (self.quize_type == QuizeLogTopicJournal and not self.quize_type.objects.filter(parent_id__parent_id__discipline_id__department_id=department_id)):
+            
+            raise PermissionDenied({"message": "You don't have permission to access",})
+        else:
+            queryset = self.model.objects.filter(parent_id=self.kwargs['instance_id'], user_id=self.kwargs['pk'])
+
+        return queryset
+
+    def get_serializer_class(self):
+        AllFieldsSerializer.Meta.model = self.model
+
+        return AllFieldsSerializer
 
 
 

@@ -72,7 +72,6 @@ class QuizeRetakeLogObject(models.Model):
 
 class QuizeLogRetakeDeciplineJournal(QuizeRetakeLogObject):
     parent_id = models.PositiveIntegerField('Дисциплинa(Доступы групп)(pk)',)
-    # parent_name = models.CharField('Дисциплинa(Доступы групп)', max_length=255)
 
     class Meta:
         app_label = 'journals'

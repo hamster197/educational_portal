@@ -267,6 +267,7 @@ class AnswerComplianceSerializer(Serializer):
     answer = CharField(label='Answer', required=True)
 
 class ReportCardHyperLinkedIdentityField(HyperlinkedIdentityField):
+
     def get_url(self, obj, view_name, request, format):
         rezult = self.context['all_users_rezults'].filter(user__pk=obj.pk).first()
 
@@ -297,8 +298,22 @@ class ReportCardSerializer(ModelSerializer):
 
         return rezult_string
 
-class ReportCardDetailSerializer(ModelSerializer):
+class AllFieldsSerializer(ModelSerializer):
 
     class Meta:
         model = None
         fields = '__all__'
+
+
+class ReportCardDetailHyperLinkedIdentityField(HyperlinkedIdentityField):
+
+    def get_url(self, obj, view_name, request, format):
+        from apps.students.models import QuizeRezultTopic
+        if self.context['instance'] == QuizeRezultTopic:
+            view_name = 'teacher_urls:report_topic_detail'
+        return self.reverse(view_name, kwargs={
+            'pk': obj.user.pk, 'instance_id':obj.parent_id.pk,
+        }, format=format, request=request)
+
+class ReportCardDetailSerializer(AllFieldsSerializer):
+    rezult_detail_log_url = ReportCardDetailHyperLinkedIdentityField(view_name='teacher_urls:report_decepline_log_detail', )
