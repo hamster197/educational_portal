@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.journals.models import QuizeLogTopicJournal, QuizeLogDeciplineJournal
 from apps.students.core import check_for_aviable_quize_rezult, get_for_aviable_quize_access, \
     get_or_create_for_aviable_quize_rezult, get_timer, get_aviable_questions, get_student_aviable_materials, \
-    get_student_unaviable_diciplines
+    get_student_unaviable_diciplines, get_random_question
 from apps.students.forms import *
 from core.decorators import students_check
 from core.models import Student, StudentGroupQuide
@@ -110,7 +110,7 @@ class TopicDetail(DiscipineDetail):
                                                discipline_access_start__lte=timezone.now())
 
         return quesryset
-
+@method_decorator(students_decorators, name='dispatch')
 class QuizeObject(DetailView):
     context_object_name = 'instance'
     now = timezone.now()
@@ -132,7 +132,7 @@ class QuizeObject(DetailView):
 
         return context
 
-@method_decorator(students_decorators, name='dispatch')
+# @method_decorator(students_decorators, name='dispatch')
 class QuizeApproval(QuizeObject):
     template_name = 'student/quize/quize_approval.html'
 
@@ -153,7 +153,7 @@ class QuizeApproval(QuizeObject):
 
 
 
-@method_decorator(students_decorators, name='dispatch')
+# @method_decorator(students_decorators, name='dispatch')
 class QuizeRezult(QuizeObject):
     template_name = 'student/quize/quize_rezult.html'
 
@@ -176,7 +176,7 @@ class QuizeRezult(QuizeObject):
 
         return context
 
-@method_decorator(students_decorators, name='dispatch')
+# @method_decorator(students_decorators, name='dispatch')
 class QuizeTest(QuizeObject):
     template_name = 'student/quize/quize_test_main.html'
 
@@ -196,7 +196,7 @@ class QuizeTest(QuizeObject):
         return get_for_aviable_quize_access(self,)
 
     def get_context_data(self, **kwargs):
-        get_aviable_questions(self)
+        # get_aviable_questions(self)
         context = super(QuizeObject, self).get_context_data(**kwargs)
         quize_rezult = get_or_create_for_aviable_quize_rezult(self)
         context['quize_rezult'] = quize_rezult
@@ -215,7 +215,7 @@ class QuizeTest(QuizeObject):
     def post(self, request, *args, **kwargs):
 
         if get_timer(self) <= 0 or not get_aviable_questions(self):
-            return redirect(self.model.get_absolute_url(self), )
+            return redirect(self.model.get_rezult_url(self), )
 
         answers_right = False
         self.object = self.get_object()
@@ -262,6 +262,7 @@ class QuizeTest(QuizeObject):
 
         if quize_rezult.get_user_questions().count() == self.object.quiestion_quantity:
             quize_rezult.ended_quize = True
+        quize_rezult.current_question = get_random_question(self)
         quize_rezult.save()
 
         return redirect(self.model.get_testing_url(self),)

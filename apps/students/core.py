@@ -81,6 +81,7 @@ def get_or_create_for_aviable_quize_rezult(self,):
         journal = QuizeLogTopicJournal
     rezult, status = rezults_type.objects.get_or_create(user=Student.objects.get(pk=self.request.user.pk),
                                                  parent_id=self.get_object(),)
+
     if rezult.final_quize != self.quize_status or status:
         rezult.final_quize = self.quize_status
         rezult.quize_started_it = datetime.datetime.now()
