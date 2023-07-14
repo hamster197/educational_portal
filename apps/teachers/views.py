@@ -502,7 +502,7 @@ class QuestionComplianceEdit(UpdateView):
 class ReportCard(DetailView):
     template_name = 'teacher/teacher_office/report_card.html'
     context_object_name = 'access'
-    quize_type = ''
+    quize_type = related_name = ''
     action = 'List'
 
     def get_queryset(self):
@@ -510,16 +510,12 @@ class ReportCard(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ReportCard, self).get_context_data(**kwargs,)
-        from django.db.models import Subquery, OuterRef
         context['final_quize_status'] = get_final_quize_status(self)
-        context['all_users_rezults'] = self.quize_type.objects.filter(parent_id=self.object, ended_quize=True,
-                                                                      final_quize=context['final_quize_status'])
-        all_users_rezults_subquery = context['all_users_rezults'].filter(user=OuterRef("pk"),)
-        if self.object.group_id:
-            user_rezults = Student.objects.filter(active_group_id=self.object.group_id, is_active=True) \
-                .annotate(user_rezult_pk=Subquery(all_users_rezults_subquery.values('pk')),
-                          quize_started_it=Subquery(all_users_rezults_subquery.values('quize_started_it')))
-            context['report_cart'] = user_rezults
+        from django.db.models import Prefetch
+        context['students'] = Student.objects.filter(active_group_id=self.object.group_id, is_active=True).prefetch_related(
+                    Prefetch(self.related_name, self.quize_type.objects.filter(parent_id=self.object, ended_quize=True,
+                                                                               final_quize=context['final_quize_status'])),
+                    )
 
         return context
 

@@ -11,19 +11,20 @@ from core.models import Teacher, DepartmentQuide
 @receiver(pre_save, sender=Topic)
 def change_discipline_theme_status(sender, instance, **kwargs):
     if instance.id is not None:
-        if 'Discipline' in str(sender):
+        if sender == Discipline:
             previous = Discipline.objects.get(id=instance.id)
-        elif 'Topic' in str(sender):
+        elif sender == Topic:
             previous = Topic.objects.get(id=instance.id)
+
         if previous.status != instance.status:
             discpline = instance.title + ' (' + str(instance.pk) + ' )'
             log_string = ' status was changed from ' + str(previous.status) + ' to ' + str(instance.status)
             log_string += ' by ' + str(get_user_from_request().username) + ' (' + str(get_user_from_request().pk) + ' )'
 
-            if 'Discipline' in str(sender):
+            if sender == Discipline:
                 DisciplineJournal.objects.create(action=log_string, title=discpline,
                                                  material_type='Дисциплинa')
-            if 'Topic' in str(sender):
+            if sender == Topic:
                 DisciplineJournal.objects.create(action=log_string, title=discpline,
                                                  material_type='Tемa')
 
@@ -37,14 +38,14 @@ def update_discipline(sender, instance,  created, **kwargs, ):
         log_string = 'created ' + discpline
         log_string += ' by ' + str(get_user_from_request().username) + ' (' + str(get_user_from_request().pk) + ' )'
 
-        if 'Discipline' in str(sender):
+        if sender == Discipline:
             DisciplineJournal.objects.create(action=log_string, title=discpline,
                                              material_type='Дисциплинa')
-        elif 'Topic' in str(sender):
+        elif sender == Topic:
             DisciplineJournal.objects.create(action=log_string, title=discpline,
                                              material_type='Tемa')
 
-    if 'Discipline' in str(sender):
+    if sender == Discipline:
         if Teacher.objects.filter(username=get_user_from_request()).exists():
             department_id = get_object_or_404(Teacher, username=get_user_from_request()).deaprtment_id
         else:
@@ -68,10 +69,10 @@ def create_parent_access(sender, instance,  created, **kwargs, ):
         log_string = ' created ' + str(instance) + ' id=' + str(instance.pk)
         log_string += ' by ' + str(get_user_from_request().username) + ' (' + str(get_user_from_request().pk) + ' )'
 
-        if 'DisciplineAccess' in str(sender):
+        if sender == DisciplineAccess:
             DisciplineJournal.objects.create(action=log_string, title=instance,
                                              material_type='Доступ к Дисциплине(и Тестам)')
-        elif 'TopicAccess' in str(sender):
+        elif sender == TopicAccess:
             DisciplineJournal.objects.create(action=log_string, title=instance,
                                              material_type='Доступ к Теме(и Тестам)')
 
@@ -80,9 +81,9 @@ def create_parent_access(sender, instance,  created, **kwargs, ):
 def change_parent_date(sender, instance, **kwargs):
     if instance.id is not None:
         log_string = ''
-        if 'DisciplineAccess' in str(sender):
+        if sender == DisciplineAccess:
             previous = DisciplineAccess.objects.get(id=instance.id)
-        elif 'TopicAccess' in str(sender):
+        elif sender == TopicAccess:
             previous = TopicAccess.objects.get(id=instance.id)
 
         if previous.discipline_access_start != instance.discipline_access_start:
@@ -111,10 +112,10 @@ def change_parent_date(sender, instance, **kwargs):
             log_string += ' by ' + str(get_user_from_request().username) + ' (' + str(get_user_from_request().pk) + ' )'
 
         if log_string:
-            if 'DisciplineAccess' in str(sender):
+            if sender == DisciplineAccess:
                 DisciplineJournal.objects.create(action=log_string, title=instance,
                                                  material_type='Доступ к Дисциплине(и Тестам)')
-            elif 'TopicAccess' in str(sender):
+            elif sender == TopicAccess:
                 DisciplineJournal.objects.create(action=log_string, title=instance,
                                                  material_type='Доступ к Теме(и Тестам)')
 

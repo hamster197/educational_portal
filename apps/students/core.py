@@ -11,7 +11,10 @@ from apps.students.models import QuizeRezultDecepline, QuizeRezultTopic
 from core.models import Student
 
 def get_student_group(self):
-    return get_object_or_404(Student, pk=self.request.user.pk).active_group_id
+    if Student.objects.filter(pk=self.request.user.pk).exists():
+        return get_object_or_404(Student, pk=self.request.user.pk).active_group_id
+    else:
+        return None
 
 
 def get_student_aviable_materials(self, instance):
@@ -110,6 +113,17 @@ def get_aviable_questions(self):
         status = False
 
     return status
+
+def get_quize_rezult(self):
+
+    if self.model == DisciplineAccess:
+        queryset = get_for_aviable_quize_access(self, ).filter(
+            quize_declpline_rezult_discipline_id__user=self.request.user, )
+    elif self.model == TopicAccess:
+        queryset = get_for_aviable_quize_access(self, ).filter(
+            quize_topic_rezult_topic_id__user=self.request.user, )
+
+    return queryset
 
 
 

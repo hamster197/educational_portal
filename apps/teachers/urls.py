@@ -43,10 +43,12 @@ urlpatterns = [
          QuestionSequenceComplianceCreate.as_view(question_type='Тест на соответствие'),
          name='question_new_compliance_url'),
 
-    path('discipine/quize/<int:pk>/', ReportCard.as_view(model=DisciplineAccess, quize_type=QuizeRezultDecepline),
-         name='report_card_discipine_url'),
-    path('topic/quize/<int:pk>/', ReportCard.as_view(model=TopicAccess, quize_type=QuizeRezultTopic),
-         name='report_card_topic_url'),
+    path('discipine/quize/<int:pk>/', ReportCard.as_view(model=DisciplineAccess, quize_type=QuizeRezultDecepline,
+                                                         related_name='students_quizerezultdecepline_related'),
+                                                         name='report_card_discipine_url'),
+    path('topic/quize/<int:pk>/', ReportCard.as_view(model=TopicAccess, quize_type=QuizeRezultTopic,
+                                                     related_name='students_quizerezulttopic_related'),
+                                                     name='report_card_topic_url'),
 
     path('discipine/quize/detail/<int:pk>/<int:user_pk>/', ReportCardDetail.as_view(model=DisciplineAccess,
                                                                                     quize_type=QuizeRezultDecepline,

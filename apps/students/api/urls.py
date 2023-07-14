@@ -17,5 +17,13 @@ urlpatterns = [
          name='discipline_detail', ),
     path('topic/<int:pk>/', MaterialDetail.as_view(serializer_class=TopicAccessDetailSerializer), name='topic_detail', ),
 
+    path('decepline/quize/approval/<int:pk>/', QuizeApproval.as_view(model=DisciplineAccess),
+         name='decepline_quize_approval_url'),
+    path('topic/quize/approval/<int:pk>/', QuizeApproval.as_view(model=TopicAccess), name='topic_quize_approval_url'),
+
+    path('decepline/quize/rezult/<int:pk>/', QuizeRezult.as_view(model=DisciplineAccess),
+         name='decepline_quize_rezult_url'),
+    path('topic/quize/rezult/<int:pk>/', QuizeRezult.as_view(model=TopicAccess), name='topic_quize_rezult_url'),
+
 ]
 

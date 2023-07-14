@@ -1,7 +1,6 @@
 {% extends 'main_tpl.html' %}
 {% block content %}
 {% load widget_tweaks %}
-{% load teacher_extras %}
  <ul class="messages">
    {% for message in messages %}
    <li class="{{ message.tags }}">{{ message|striptags  }}</li>
@@ -17,22 +16,27 @@
         from {{ access.test_quize_start }} to {{ access.test_quize_end }}
         {% endif %}
     </h2>
-        <form class="post-form" method="post"  enctype="multipart/form-data">
-        {% csrf_token %}
-    {% for cart in report_cart %}
-        <p>{{ cart }}
-          {%  if cart.user_rezult_pk %}
-              testing was started in {{ cart.quize_started_it }}
-              {% get_quize_rezult all_users_rezults cart.user_rezult_pk %}
-              {% if access.parent_id.discipline_id  %}
-                  <p><a href="{% url 'teacher_urls:report_card_topic_detail_url' pk=access.pk user_pk=cart.pk %}">Detail</a>
-              {% else %}
-                  <p><a href="{% url 'teacher_urls:report_card_discipine_detail_url' pk=access.pk user_pk=cart.pk %}">Detail</a>
-              {% endif %}
-                  <button type="submit" name="_retake_quize" value='{{ cart.pk }}' class="button btn-align secondary-btn raised"> retake_quize </button>
-        {% else %} N/A
-          {% endif %}</p>
+
+    <form class="post-form" method="post"  enctype="multipart/form-data">
+        {% csrf_token %} {{ quize_type }}
+    {% for student in students %}
+        <p>{{ student }}
+        {% if not access.parent_id.discipline_id  %}
+            {% for rezult in student.students_quizerezultdecepline_related.all %}
+                testing was started at {{  rezult.quize_started_it }} estimation {{ rezult.get_estimation }}
+                correct answers {{ rezult.get_correct_answers }} percent {{ rezult.get_correct_answers_percent }}
+                <a href="{% url 'teacher_urls:report_card_discipine_detail_url' pk=access.pk user_pk=student.pk %}">Detail</a>
+                <button type="submit" name="_retake_quize" value='{{ rezult.pk }}' class="button btn-align secondary-btn raised"> retake_quize </button>
+            {% endfor %}
+        {% else %}
+            {% for rezult in student.students_quizerezulttopic_related.all %}
+                testing was started at {{  rezult.quize_started_it }} estimation {{ rezult.get_estimation }}
+                correct answers {{ rezult.get_correct_answers }} percent {{ rezult.get_correct_answers_percent }}
+                <a href="{% url 'teacher_urls:report_card_topic_detail_url' pk=access.pk user_pk=student.pk %}">Detail</a>
+                <button type="submit" name="_retake_quize" value='{{ rezult.pk }}' class="button btn-align secondary-btn raised"> retake_quize </button>
+            {% endfor %}
+        {% endif %}
+
     {% endfor %}
         </form>
-
 {% endblock %}

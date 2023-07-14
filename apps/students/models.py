@@ -7,7 +7,8 @@ from core.models import Student
 
 
 class QuizeRezultObject(models.Model):
-    user = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE, )
+    user = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE,
+                             related_name="%(app_label)s_%(class)s_related",)
     current_question = models.ForeignKey(Question, verbose_name='Tекущий вопрос', on_delete=models.CASCADE, null=True,)
     final_quize = models.BooleanField('Итоговый тест?', default=False)
     ended_quize = models.BooleanField('Тест сдавался?', default=False)

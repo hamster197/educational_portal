@@ -3,10 +3,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
 
-from apps.educational_materials.models import DisciplineAccess
+from apps.educational_materials.models import DisciplineAccess, TopicAccess
 from apps.students.api.permissions import IsAnonymous, IsStudent
 from apps.students.api.serializers import StudentRegisterSerializer
-from apps.students.core import get_student_aviable_materials, get_student_unaviable_diciplines, get_student_group
+from apps.students.core import get_student_aviable_materials, get_student_unaviable_diciplines, get_student_group, \
+    get_for_aviable_quize_access, get_quize_rezult
+from apps.teachers.api.serializers import AllFieldsSerializer
+from core.models import Student
 
 
 class StudentRegister(CreateAPIView):
@@ -68,3 +71,56 @@ class MaterialDetail(RetrieveAPIView):
             return get_student_aviable_materials(self, self.serializer_class.Meta.model)
         else:
             return get_student_unaviable_diciplines(self)
+
+class QuizeObject(RetrieveAPIView):
+    now = timezone.now()
+    quize_status = False
+    model = None
+    permission_classes = (IsStudent,)
+
+    def setup(self, request, *args, **kwargs):
+        if hasattr(self, "get") and not hasattr(self, "head"):
+            self.head = self.get
+        self.request = request
+        self.args = args
+        self.kwargs = kwargs
+        if get_for_aviable_quize_access(self, ).filter(final_quize_start__lte=self.now, \
+                                                       final_quize_end__gte=self.now).exists():
+            self.quize_status = True
+
+class QuizeApproval(QuizeObject):
+    """
+            view quize Approval.
+            permissions:
+            IsStudent,
+
+    """
+
+    def get_serializer_class(self):
+        AllFieldsSerializer.Meta.model = self.model
+
+        return AllFieldsSerializer
+    def get_queryset(self):
+        if self.model == DisciplineAccess:
+            return get_for_aviable_quize_access(self, ).filter(parent_id__status=True)
+        elif self.model == TopicAccess:
+            return get_for_aviable_quize_access(self, ).filter(parent_id__status=True,
+                                                                       parent_id__discipline_id__status=True,)
+
+class QuizeRezult(QuizeApproval):
+    """
+            view quize rezult.
+            permissions:
+            IsStudent,
+    """
+    
+    # def get_serializer_class(self):
+    #     AllFieldsSerializer.Meta.model = self.model
+    #
+    #     return AllFieldsSerializer
+
+    def get_queryset(self):
+        return get_quize_rezult(self)
+
+
+

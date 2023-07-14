@@ -12,7 +12,7 @@ from django.utils import timezone
 from apps.journals.models import QuizeLogTopicJournal, QuizeLogDeciplineJournal
 from apps.students.core import check_for_aviable_quize_rezult, get_for_aviable_quize_access, \
     get_or_create_for_aviable_quize_rezult, get_timer, get_aviable_questions, get_student_aviable_materials, \
-    get_student_unaviable_diciplines, get_random_question
+    get_student_unaviable_diciplines, get_random_question, get_quize_rezult
 from apps.students.forms import *
 from core.decorators import students_check
 from core.models import Student, StudentGroupQuide
@@ -132,7 +132,6 @@ class QuizeObject(DetailView):
 
         return context
 
-# @method_decorator(students_decorators, name='dispatch')
 class QuizeApproval(QuizeObject):
     template_name = 'student/quize/quize_approval.html'
 
@@ -153,20 +152,11 @@ class QuizeApproval(QuizeObject):
 
 
 
-# @method_decorator(students_decorators, name='dispatch')
 class QuizeRezult(QuizeObject):
     template_name = 'student/quize/quize_rezult.html'
 
     def get_queryset(self):
-
-        if self.model == DisciplineAccess:
-            queryset = get_for_aviable_quize_access(self, ).filter(
-                quize_declpline_rezult_discipline_id__user=self.request.user,)
-        elif self.model == TopicAccess:
-            queryset = get_for_aviable_quize_access(self, ).filter(
-                quize_topic_rezult_topic_id__user=self.request.user,)
-
-        return queryset
+        return get_quize_rezult(self)
 
     def get_context_data(self, **kwargs):
         context = super(QuizeRezult, self).get_context_data(**kwargs)
@@ -176,7 +166,6 @@ class QuizeRezult(QuizeObject):
 
         return context
 
-# @method_decorator(students_decorators, name='dispatch')
 class QuizeTest(QuizeObject):
     template_name = 'student/quize/quize_test_main.html'
 
@@ -196,7 +185,6 @@ class QuizeTest(QuizeObject):
         return get_for_aviable_quize_access(self,)
 
     def get_context_data(self, **kwargs):
-        # get_aviable_questions(self)
         context = super(QuizeObject, self).get_context_data(**kwargs)
         quize_rezult = get_or_create_for_aviable_quize_rezult(self)
         context['quize_rezult'] = quize_rezult

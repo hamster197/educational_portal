@@ -193,14 +193,12 @@ DJOSER = {
     },
     'SERIALIZERS': {
          'user': 'core.api.serializers.MyUserSerializer',
-         # 'user_create': 'app.apps.accounts.api.serializers.UserRegistrationSerializer'
     },
 }
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASE_ROUTERS = ['apps.journals.router.JournalsRouter']
 DATABASE_ROUTERS = ['core.router.JournalsRouter']
 
 
