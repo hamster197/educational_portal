@@ -205,12 +205,14 @@ DATABASE_ROUTERS = ['core.router.JournalsRouter']
 DATABASES = {
     'default': {
         'ENGINE': env('DATABASE_ENGINE'),
-        "NAME": BASE_DIR / env('DATABASE_NAME'),
+        'NAME': BASE_DIR / env('DATABASE_NAME'),
+        'ATOMIC_REQUESTS': True,
     },
     'journals': {
         'ENGINE': env('DATABASE_ENGINE'),
-        "NAME": BASE_DIR / env('JOURNAL_DATABASE_NAME'),
-    }
+        'NAME': BASE_DIR / env('JOURNAL_DATABASE_NAME'),
+        'ATOMIC_REQUESTS': True,
+    },
 }
 
 
