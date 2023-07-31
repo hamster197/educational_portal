@@ -66,7 +66,6 @@ async def asyncio_send_mail(message_text, email):
             password=EMAIL_HOST_PASSWORD
         )
     except aiosmtplib.errors.SMTPException:
-        print(1)
         pass
 
 
